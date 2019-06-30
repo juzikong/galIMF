@@ -104,7 +104,7 @@ List_xi = []
 def function_draw_igimf(SFR, alpha3_model, beta_model, delta_t, M_over_H, I_ecl, M_ecl_U, M_ecl_L,
                         I_str, M_str_L, alpha_1, alpha1_model, M_turn, alpha_2, alpha2_model, M_turn2, M_str_U):
     if SFR != 0:
-        global List_M_ecl_for_xi_ecl, List_xi, List_M_str_for_xi_str, List_xi_L, List_Log_M_str, x_IMF, y_IMF
+        global List_M_ecl_for_xi_ecl, List_xi, List_M_str_for_xi_str, List_xi_L, List_Log_M_str, x_IMF, y_IMF, List_xi_str
         function_ecmf(SFR, beta_model, delta_t, I_ecl, M_ecl_U, M_ecl_L, M_over_H)
         x_IMF = []
         y_IMF = []
@@ -113,7 +113,10 @@ def function_draw_igimf(SFR, alpha3_model, beta_model, delta_t, M_over_H, I_ecl,
         alpha_3_change = function_alpha_3_change(alpha3_model, List_M_ecl_for_xi_ecl[-1], M_over_H)
         function_draw_xi_str(M_str_L, List_M_ecl_for_xi_ecl[-1], I_str, M_str_L, alpha_1_change,
                              M_turn, alpha_2_change, M_turn2, alpha_3_change, M_str_U)
-        List_xi = [0] * len(x_IMF)
+        maximum_number_of_mass_grid = function_maximum_number_of_mass_grid(M_str_L, M_str_U)
+        List_xi = [1e-10] * maximum_number_of_mass_grid
+        List_M_str_for_xi_str = [M_str_U] * maximum_number_of_mass_grid
+        List_xi_str = [1e-10] * maximum_number_of_mass_grid
         number_of_ecl = len(List_M_ecl_for_xi_ecl) - 1
         function_IMF(alpha3_model, M_over_H, I_str, M_str_L, alpha_1_change, M_turn, alpha_2_change, M_turn2, M_str_U,
                      number_of_ecl, 0)
@@ -121,11 +124,17 @@ def function_draw_igimf(SFR, alpha3_model, beta_model, delta_t, M_over_H, I_ecl,
         y_IMF = []
         function_draw_xi_str(M_str_L, List_M_ecl_for_xi_ecl[-1], I_str, M_str_L, alpha_1_change,
                              M_turn, alpha_2_change, M_turn2, alpha_3_change, M_str_U)
-        List_M_str_for_xi_str = x_IMF
+        for i in range(len(x_IMF)):
+            List_M_str_for_xi_str[i] = x_IMF[i]
         lenth = len(List_M_str_for_xi_str)
         List_xi_L = [0] * lenth
         List_Log_M_str = [0] * lenth
         function_xi_to_xiL(lenth - 1, List_xi[0])
+        for eee in range(len(List_M_str_for_xi_str)):
+            if List_M_str_for_xi_str[eee] == M_str_U:
+                List_xi[eee] = List_xi[eee-1]
+                List_M_str_for_xi_str[eee] = List_M_str_for_xi_str[eee-1]
+                List_xi_str[eee] = List_xi_str[eee-1]
     else:
         List_M_str_for_xi_str = [0, 1000]
         List_xi = [0, 0]
@@ -163,8 +172,10 @@ def function_IMF(alpha3_model, M_over_H, I_str, M_str_L, alpha_1_change, M_turn,
         # Here only alpha_3_change is recalculated as alpha1(2)_change do not depend on M_ecl thus do not change.
         function_draw_xi_str(M_str_L, M_ecl, I_str, M_str_L, alpha_1_change, M_turn, alpha_2_change, M_turn2,
                              alpha_3_change, M_str_U)
-        List_M_str_for_xi_str = x_IMF
-        List_xi_str = y_IMF
+        for qqq in range(len(x_IMF)):
+            List_M_str_for_xi_str[qqq] = x_IMF[qqq]
+        for www in range(len(y_IMF)):
+            List_xi_str[www] = y_IMF[www]
         number_of_str = len(List_M_str_for_xi_str)
         function_update_list_xi(i, number_of_str, 0)
         (i) = (i+1)
@@ -886,9 +897,9 @@ def function_draw_xi_str(M_str_L, M_ecl, I_str, M_L, alpha_1, M_turn, alpha_2, M
     function_draw_xi_str_loop(M_str_L, alpha_1, M_turn, alpha_2, M_turn2, alpha_3)
     return
 
-
+mass_grid_index = 1.05
 def function_draw_xi_str_loop(M_str, alpha_1, M_turn, alpha_2, M_turn2, alpha_3):
-    global x_IMF, y_IMF, k1, k2, k3, M_max
+    global x_IMF, y_IMF, k1, k2, k3, M_max, mass_grid_index
     while M_str < M_max:
         x_IMF += [M_str]
         if M_str > M_turn2:
@@ -898,10 +909,17 @@ def function_draw_xi_str_loop(M_str, alpha_1, M_turn, alpha_2, M_turn2, alpha_3)
         else:
             xi = k1 * M_str ** (-alpha_1)
         y_IMF += [xi]
-        (M_str) = (1.02 * M_str)
+        (M_str) = (mass_grid_index * M_str)
     return
 
-
+def function_maximum_number_of_mass_grid(M_str_min, M_str_max):
+    global mass_grid_index
+    maximum_number_of_mass_grid = 4
+    M_str = M_str_min
+    while M_str < M_max:
+        maximum_number_of_mass_grid += 1
+        (M_str) = (mass_grid_index * M_str)
+    return maximum_number_of_mass_grid
 
 
 

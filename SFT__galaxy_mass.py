@@ -5,13 +5,6 @@ import multiprocessing as mp
 from time import time
 
 def simulate(imf, Log_SFR, SFEN, STF):
-    # generate SFH:
-    SFH_shape = 'flat'
-    location = 0
-    skewness = 10
-    sfr_tail = 0
-
-    galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
 
     Z_0 = 0.00000001886
     solar_mass_component = "Anders1989_mass"
@@ -79,25 +72,34 @@ def simulate(imf, Log_SFR, SFEN, STF):
     return
 
 
+# Parallelizing using Pool.map()
+def a_pipeline(parameter):
+    STF = parameter
+    print("\n Start simulation for:", SFEN, STF, Log_SFR, imf)
+    simulate(imf, Log_SFR, SFEN, STF)
+    return
+
+
 if __name__ == '__main__':
     start = time()
 
+    # generate SFH:
     SFEN = 100
-    STF_list = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5]
     Log_SFR = 4.0
+    SFH_shape = 'flat'
+    location = 0
+    skewness = 10
+    sfr_tail = 0
+    galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
 
-    # Parallelizing using Pool.map()
-    def a_pipeline(parameter):
-        STF = parameter
-        print("\n Start simulation for:", SFEN, STF, Log_SFR, imf)
-        simulate(imf, Log_SFR, SFEN, STF)
-        return
-
+    # simulate for different star transformation fraction
+    STF_list = [0.2, 0.3, 0.4]
     imf = 'igimf'
     pool = mp.Pool(mp.cpu_count())
     pool.map(a_pipeline, [STF for STF in STF_list])
     pool.close()
 
+    STF_list = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5]
     imf = 'Kroupa'
     pool = mp.Pool(mp.cpu_count())
     pool.map(a_pipeline, [STF for STF in STF_list])

@@ -35,7 +35,7 @@ print("    This test code serves as an example, "
 # Set the final out put plot size:
 # --------------------------------------------------------------------------------------------------------------------------------
 
-fig0 = plt.figure(figsize=(3.4, 2.5))
+fig0 = plt.figure(figsize=(4, 3.5))
 
 
 # --------------------------------------------------------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ if ylim_max < np.max(can_imf):
 plt.xlabel('$\log{(m\,[M_{\odot}])}$')
 plt.ylabel('$\log{(\\xi_{\mathrm{gal}}\,[M_{\odot}^{-1}])}$')
 
-plt.ylim(np.log10(ylim_min), np.log10(ylim_max))
+plt.ylim(np.log10(ylim_min)*0.9, np.log10(ylim_max)*1.1)
 plt.xlim(math.log(0.06, 10), math.log(160, 10))
 
 plt.legend(loc='best', ncol=1, fancybox=True, prop={'size': 7})

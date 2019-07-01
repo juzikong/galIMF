@@ -123,12 +123,12 @@ while mass__ < 12.501:
 plt.plot(mass__list, mean_data_Z_H__list, c='k', label='Arrigoni10 mean', zorder=7)
 plt.plot(mass__list, up_data_Z_H__list, c='k', ls='dotted', label='Arrigoni10 std', zorder=5)
 plt.plot(mass__list, down_data_Z_H__list, c='k', ls='dotted', zorder=5)
-plt.fill_between(mass__list, down_data_Z_H__list, up_data_Z_H__list, alpha=0.3, facecolor='royalblue', linewidth=0)
+plt.fill_between(mass__list, down_data_Z_H__list, up_data_Z_H__list, alpha=0.4, facecolor='royalblue', linewidth=0)
 
 # plt.plot(mass__list, mean_data_MgFe__list, c='k', zorder=7)
 # plt.plot(mass__list, up_data_MgFe__list, c='k', ls='dotted', zorder=5)
 # plt.plot(mass__list, down_data_MgFe__list, c='k', ls='dotted', zorder=5)
-# plt.fill_between(mass__list, down_data_MgFe__list, up_data_MgFe__list, alpha=0.3, facecolor='chocolate', linewidth=0)
+# plt.fill_between(mass__list, down_data_MgFe__list, up_data_MgFe__list, alpha=0.4, facecolor='chocolate', linewidth=0)
 
 
 mass_thomas = np.arange(6, 15, 1)
@@ -138,7 +138,7 @@ alpha_thomas_low = -0.459 + 0.062 * mass_thomas - 0.1
 plt.plot(mass_thomas, alpha_thomas, c='k', ls='dashed', zorder=7, label='Thomas05')
 plt.plot(mass_thomas, alpha_thomas_up, c='k', ls='dotted', zorder=5)
 plt.plot(mass_thomas, alpha_thomas_low, c='k', ls='dotted', zorder=5)
-plt.fill_between(mass_thomas, alpha_thomas_low, alpha_thomas_up, alpha=0.3, facecolor='chocolate', linewidth=0)
+plt.fill_between(mass_thomas, alpha_thomas_low, alpha_thomas_up, alpha=0.4, facecolor='chocolate', linewidth=0)
 
 
 ############## fit discrete relation with a function ##############
@@ -303,7 +303,7 @@ alpha_values_igimf = np.delete(alpha_values_igimf, 0, axis=0)
 
 #################### setup interpretation ####################
 
-grid_SFEN, grid_STF, grid_Dynamical_mass = np.mgrid[5:800:100j, 0:1:100j, 9:12:100j]
+grid_SFEN, grid_STF, grid_Dynamical_mass = np.mgrid[5:400:100j, 0:1:100j, 9:12:100j]
 # the range of grid_Dynamical_mass is limited by the observation data
 number_of_SFEN = 100
 number_of_STF = 100
@@ -380,7 +380,8 @@ def calculate_likelihood_metal(SFEN_i, STF_j, Dynamical_mass_k, IMF, error_metal
 ######### SFT--galaxy-mass relations given by Thomas05 and Recchi09 #########
 
 def f1(t):
-    return math.exp(3.67-0.37*t)
+    # return math.exp(3.67-0.37*t)
+    return math.exp(3.954-0.372*t)
 def f2(t):
     return math.exp(2.38-0.24*t)
 t = [8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12]
@@ -407,14 +408,14 @@ error_alpha_list = [-0.2, 0, 0.2]
 # error_alpha_list = [-0.2, 0, 0.2]
 
 
-# IMF = "Kroupa"
-# error_metal_list = [0]
-# error_alpha_list = [0]
+IMF = "Kroupa"
+error_metal_list = [0]
+error_alpha_list = [0]
 
 
-# IMF = "igimf"
-# error_metal_list = [0.2]
-# error_alpha_list = [0.3]
+IMF = "igimf"
+error_metal_list = [0]
+error_alpha_list = [0]
 
 
 
@@ -422,6 +423,47 @@ error_alpha_list = [-0.2, 0, 0.2]
 
 
 ### find best likelihood and plot ###
+
+
+############# single plots #############
+
+# # STF fixe for entire map:
+# fig = plt.figure(2, figsize=(4, 3.5))
+# plt.xlabel(r'log$_{10}$(M$_{*}$ [M$_\odot$])')
+# plt.ylabel(r't$_{\rm sf}$ [Gyr]')
+# plt.xlim(9, 12)
+# plt.ylim(0, 4)
+# SFEN_interpolate_list = []
+# STF_interpolate_list = []
+# Dynamical_mass_interpolate_list = []
+# total_likelihood_list = []
+#
+# for SFEN_i in range(number_of_SFEN):
+#     for Dynamical_mass_k in range(number_of_Dynamical_mass):
+#         STF_j = 50
+#         SFEN_interpolate, STF_interpolate, Dynamical_mass_interpolate, total_likelihood = \
+#             calculate_likelihood(SFEN_i, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)
+#         SFEN_interpolate_list.append(SFEN_interpolate/100)
+#         STF_interpolate_list.append(STF_interpolate)
+#         Dynamical_mass_interpolate_list.append(Dynamical_mass_interpolate)
+#         total_likelihood_list.append(total_likelihood)
+# sc = plt.scatter(Dynamical_mass_interpolate_list, SFEN_interpolate_list, c=total_likelihood_list, s=30)
+# plt.colorbar(sc)
+# ### plots for previous studies ###
+# plt.plot(t, y1, c='k', ls='dashed', label='Thomas05-ln')
+# mass_thomas_list = np.arange(9, 12.1, 0.1)
+# SFT_thomas_list = []
+# for i in mass_thomas_list:
+#     # alpha_interpolate_obs = fun_obs_alpha_mass(i)
+#     alpha_interpolate_obs = -0.459 + 0.062 * i + error_alpha
+#     SFT_thomas = math.exp((1/5-alpha_interpolate_obs)*6)
+#     SFT_thomas_list.append(SFT_thomas)
+# plt.plot(mass_thomas_list, SFT_thomas_list, c='k', ls='dotted', label='Thomas05-ln')
+# plt.plot(t, y2, c='k', ls='-.', label='Recchi09')
+# plt.legend(prop={'size': 7}, loc='upper right')
+# plt.tight_layout()
+
+
 
 # Instead of fit both obseravtion simutanously,
 # here first fit only Z to determine STF
@@ -431,9 +473,263 @@ error_alpha_list = [-0.2, 0, 0.2]
 ###### Fig 2 & 6 #######
 
 
+def calculate_for_a_galaxy_mass(Dynamical_mass_k):
+    total_likelihood__ = 0
+    print(Dynamical_mass_k + 1, '%')
+    ### first fit metal abundance to determine the best STF for each galaxy-mass ###
+    for STF_j__, SFEN_i__ in itertools.product(range(number_of_STF), range(number_of_SFEN)):
+        total_likelihood = calculate_likelihood_metal(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal)
+        # total_likelihood = calculate_likelihood(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal, error_alpha)[3]
+        if not np.isnan(total_likelihood):
+            if total_likelihood > total_likelihood__:
+                total_likelihood__ = total_likelihood
+                STF_j = STF_j__
+    ### cut the plot where simulation grid is not available ###
+    SFEN_test_1 = round(number_of_SFEN / 10 * 8)
+    SFEN_test_2 = round(number_of_SFEN / 10 * 2)
+    total_likelihood_test_1 = calculate_likelihood(SFEN_test_1, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)[
+        3]
+    total_likelihood_test_2 = calculate_likelihood(SFEN_test_2, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)[
+        3]
+    # total_likelihood_test_1 = True
+    # total_likelihood_test_2 = True
+    ### for each galaxy-mass with fixed STF calculate the likelihood (consider both metal and Mg/Fe) for each SFT ###
+    if not (np.isnan(total_likelihood_test_1) and np.isnan(total_likelihood_test_2)):
+        total_likelihood__ = 0
+        SFEN__ = 0
+        for SFEN_i in range(number_of_SFEN):
+            SFEN_interpolate, STF_interpolate, Dynamical_mass_interpolate, total_likelihood = \
+                calculate_likelihood(SFEN_i, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)
+            SFEN_interpolate_list.append(SFEN_interpolate / 100)
+            STF_interpolate_list.append(STF_interpolate)
+            Dynamical_mass_interpolate_list.append(Dynamical_mass_interpolate)
+            total_likelihood_list.append(total_likelihood * prior_likelihood)
+            if not np.isnan(total_likelihood):
+                if total_likelihood > total_likelihood__:
+                    total_likelihood__ = total_likelihood
+                    SFEN__ = SFEN_interpolate
+        if SFEN__ == 0:
+            best_mass_SFEN_list.append([None, None])
+        else:
+            best_mass_SFEN_list.append([Dynamical_mass_interpolate, SFEN__ / 100])
+    result = [SFEN_interpolate_list, STF_interpolate_list, Dynamical_mass_interpolate_list, total_likelihood_list,
+              best_mass_SFEN_list]
+    return result
+
+
+fig = plt.figure(10, figsize=(4, 3.5))
+plt.xlabel(r'log$_{10}$(M$_{*}$ [M$_\odot$])')
+plt.ylabel(r't$_{\rm sf}$ [Gyr]')
+plt.xlim(9, 12)
+plt.ylim(0, 4)
+for error_metal, error_alpha in itertools.product(error_metal_list, error_alpha_list):
+    print(error_metal, error_alpha)
+    prior_likelihood = math.erfc(abs(error_metal) / standard_deviation_systematic_metal / 2 ** 0.5) * \
+                       math.erfc(abs(error_alpha) / standard_deviation_systematic_alpha / 2 ** 0.5)
+    SFEN_interpolate_list = []
+    STF_interpolate_list = []
+    Dynamical_mass_interpolate_list = []
+    total_likelihood_list = []
+    best_mass_SFEN_list = []  # [(mass1, SFEN1), (mass2, SFEN2)...]
+
+    pool = mp.Pool(mp.cpu_count())
+    results = pool.map(calculate_for_a_galaxy_mass, [Dynamical_mass_k for Dynamical_mass_k in range(number_of_Dynamical_mass)])
+    for i in range(number_of_Dynamical_mass):
+        # print(results[i])
+        SFEN_interpolate_list.extend(results[i][0])
+        STF_interpolate_list.extend(results[i][1])
+        Dynamical_mass_interpolate_list.extend(results[i][2])
+        total_likelihood_list.extend(results[i][3])
+        best_mass_SFEN_list.extend(results[i][4])
+    pool.close()
+    best_mass_SFEN_list_sorted = sorted(best_mass_SFEN_list, key=lambda l: l[0])
+
+    # print("Plotting...")
+    plt.scatter(Dynamical_mass_interpolate_list, SFEN_interpolate_list, c=total_likelihood_list, s=10)
+    plt.plot(*zip(*best_mass_SFEN_list_sorted), c='r', linewidth=0.8)
+    sc = plt.scatter([0, 0], [0, 0], c=[0, 1], s=1)
+    clb = plt.colorbar(sc)
+    clb.set_label('likelihood')
+    plt.title('[Z/X]_lit+({}); [Mg/Fe]_lit+({})'.format(error_metal, error_alpha), fontsize=8)
+### plots for previous studies ###
+plt.plot(t, y1, c='k', ls='dashed', label='Thomas05-ln')
+mass_thomas_list = np.arange(9, 12.1, 0.1)
+SFT_thomas_list = []
+for i in mass_thomas_list:
+    # alpha_interpolate_obs = fun_obs_alpha_mass(i)
+    alpha_interpolate_obs = -0.459 + 0.062 * i + error_alpha
+    SFT_thomas = math.exp((1/5-alpha_interpolate_obs)*6)
+    SFT_thomas_list.append(SFT_thomas)
+plt.plot(mass_thomas_list, SFT_thomas_list, c='k', ls='dotted', label='Thomas05-ln')
+plt.plot(t, y2, c='k', ls='-.', label='Recchi09')
+plt.legend(prop={'size': 7}, loc='upper right')
+plt.tight_layout()
+if IMF == "Kroupa":
+    plt.savefig('likelihood_Kroupa.pdf', dpi=250)
+if IMF == "igimf":
+    plt.savefig('likelihood_igimf.pdf', dpi=250)
+
+
+
+### plot STF--mass relation ###
+
+print(error_metal, error_alpha)
+prior_likelihood = math.erfc(abs(error_metal) / standard_deviation_systematic_metal / 2 ** 0.5) * \
+                   math.erfc(abs(error_alpha) / standard_deviation_systematic_alpha / 2 ** 0.5)
+SFEN_interpolate_list = []
+STF_interpolate_list = []
+Dynamical_mass_interpolate_list = []
+total_likelihood_list = []
+best_mass_SFEN_list = []
+best_STF_mass_list = []
+best_alpha_SFEN_list = []
+
+def parallel_mass(Dynamical_mass_k):
+    print(Dynamical_mass_k+1, '%')
+
+    ### find the best-fit STF--galaxy-mass relation ###
+    total_likelihood__ = 0
+    STF_j = 0
+    for STF_j__, SFEN_i__ in itertools.product(range(number_of_STF), range(number_of_SFEN)):
+        total_likelihood = calculate_likelihood_metal(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal)
+        # total_likelihood = calculate_likelihood(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal, error_alpha)[3]
+        if not np.isnan(total_likelihood):
+            if total_likelihood > total_likelihood__:
+                total_likelihood__ = total_likelihood
+                STF_j = STF_j__
+    if STF_j == 0:
+        print("Warning: no solution for STF_j?")
+
+    # ### for a given STF--galaxy-mass relation ###
+    # # STF_j = round((0.1 + 0.9 / number_of_Dynamical_mass * Dynamical_mass_k) * number_of_STF)
+    # STF_j = round((0.5 - 0 / number_of_Dynamical_mass * Dynamical_mass_k) * number_of_STF)
+
+    SFEN_test_1 = round(number_of_SFEN/10*8)
+    SFEN_test_2 = round(number_of_SFEN/10*2)
+    total_likelihood_test_1 = calculate_likelihood(SFEN_test_1, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)[3]
+    total_likelihood_test_2 = calculate_likelihood(SFEN_test_2, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)[3]
+    # total_likelihood_test_1 = True
+    # total_likelihood_test_2 = True
+    if not (np.isnan(total_likelihood_test_1) and np.isnan(total_likelihood_test_2)):
+        total_likelihood__ = 0
+        SFEN__ = 0
+        Dynamical_mass_interpolate = 0
+        for SFEN_i in range(number_of_SFEN):
+            SFEN_interpolate, STF_interpolate, Dynamical_mass_interpolate, total_likelihood = \
+                calculate_likelihood(SFEN_i, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)
+            SFEN_interpolate_list.append(SFEN_interpolate / 100)
+            total_likelihood_list.append(total_likelihood * prior_likelihood)
+            if not np.isnan(total_likelihood):
+                if total_likelihood > total_likelihood__:
+                    total_likelihood__ = total_likelihood
+                    SFEN__ = SFEN_interpolate
+        if SFEN__ == 0 or Dynamical_mass_interpolate == 0:
+            best_mass_SFEN_list.append([best_mass_SFEN_list[-1][0], best_mass_SFEN_list[-1][1]])
+            best_alpha_SFEN_list.append([best_alpha_SFEN_list[-1][0], best_alpha_SFEN_list[-1][1]])
+            best_STF_mass_list.append([best_STF_mass_list[-1][0], best_STF_mass_list[-1][1]])
+        else:
+            best_STF_mass_list.append([Dynamical_mass_interpolate, STF_interpolate])
+            best_mass_SFEN_list.append([Dynamical_mass_interpolate, SFEN__ / 100])
+            # alpha_interpolate_obs = fun_obs_alpha_mass(Dynamical_mass_interpolate) + error_alpha
+            alpha_interpolate_obs = -0.459+0.062*Dynamical_mass_interpolate + error_alpha
+            best_alpha_SFEN_list.append([SFEN__ / 100, alpha_interpolate_obs])
+    result = [SFEN_interpolate_list, STF_interpolate_list, total_likelihood_list, best_STF_mass_list,
+              best_mass_SFEN_list, best_alpha_SFEN_list]
+    return result
+
+
+pool = mp.Pool(mp.cpu_count())
+results = pool.map(parallel_mass, [Dynamical_mass_k for Dynamical_mass_k in range(number_of_Dynamical_mass)])
+for i in range(number_of_Dynamical_mass):
+    SFEN_interpolate_list.extend(results[i][0])
+    STF_interpolate_list.extend(results[i][1])
+    total_likelihood_list.extend(results[i][2])
+    best_STF_mass_list.extend(results[i][3])
+    best_mass_SFEN_list.extend(results[i][4])
+    best_alpha_SFEN_list.extend(results[i][5])
+pool.close()
+best_mass_SFEN_list_sorted = sorted(best_mass_SFEN_list, key=lambda l: l[0])
+best_alpha_SFEN_list_sorted = sorted(best_alpha_SFEN_list, key=lambda l: l[0])
+best_STF_mass_list_sorted = sorted(best_STF_mass_list, key=lambda l: l[0])
+
+
+fig = plt.figure(1001, figsize=(4, 3.5))
+plt.plot(*zip(*best_STF_mass_list_sorted), label='[Z/X] {}'.format(error_metal), c='k', ls='dashed')
+plt.xlabel(r'log$_{10}$(M$_{*}$ [M$_\odot$])')
+plt.ylabel(r'f$_{\rm st}$')
+plt.xlim(9, 12)
+# plt.ylim(0, 1)
+# plt.plot([], [], label='[Z/X], [Mg/Fe]:')
+plt.legend(prop={'size': 7}, loc='best')
+plt.tight_layout()
+# if IMF == "Kroupa":
+#     plt.savefig('best_STF_Kroupa.pdf', dpi=250)
+# if IMF == "igimf":
+#     plt.savefig('best_STF_igimf.pdf', dpi=250)
+
+
+fig = plt.figure(1002, figsize=(4, 3.5))
+plt.plot(*zip(*best_mass_SFEN_list_sorted), c='r', ls='dashed')
+plt.xlabel(r'log$_{10}$(M$_{*}$ [M$_\odot$])')
+plt.ylabel(r't$_{\rm sf}$ [Gyr]')
+plt.xlim(9, 13)
+plt.ylim(0, 4)
+plt.plot(t, y1, c='k', ls='dashed', label='Thomas05-ln')
+plt.plot(t, y2, c='k', ls='-.', label='Recchi09')
+mass_thomas_list = np.arange(9, 12.1, 0.1)
+SFT_thomas_list = []
+for i in mass_thomas_list:
+    # alpha_interpolate_obs = fun_obs_alpha_mass(i)
+    alpha_interpolate_obs = -0.459+0.062*i
+    SFT_thomas = math.exp((1/5-alpha_interpolate_obs)*6)
+    SFT_thomas_list.append(SFT_thomas)
+plt.plot(mass_thomas_list, SFT_thomas_list, c='k', ls='dotted', label='Thomas05-check')
+# plt.plot([], [], label='[Z/X], [Mg/Fe]:')
+plt.legend(prop={'size': 7}, loc='upper right')
+plt.tight_layout()
+# if IMF == "Kroupa":
+#     plt.savefig('best_SFEN_Kroupa.pdf', dpi=250)
+# if IMF == "igimf":
+#     plt.savefig('best_SFEN_igimf.pdf', dpi=250)
+
+
+fig = plt.figure(1003, figsize=(4, 3.5))
+plt.plot(*zip(*best_alpha_SFEN_list_sorted), c='r', ls='dashed')
+plt.xlabel(r't$_{\rm sf}$ [Gyr]')
+plt.ylabel('[Mg/Fe]')
+plt.xlim(0, 4)
+plt.ylim(0, 0.65)
+SFT_thomas = np.arange(0.01, 4.1, 0.1)
+alpha_thomas = []
+for i in SFT_thomas:
+    alpha_thomas.append(1/5-1/6*math.log(i))
+plt.plot(SFT_thomas, alpha_thomas, c='k', ls='dashed', label='Thomas05')
+plt.legend(prop={'size': 7}, loc='best')
+plt.tight_layout()
+# if IMF == "Kroupa":
+#     plt.savefig('alpha_SFEN_Kroupa.pdf', dpi=250)
+# if IMF == "igimf":
+#     plt.savefig('alpha_SFEN_igimf.pdf', dpi=250)
+
+
+
+
+
+
+
+
+
+############# plot 3*3 array #############
+
+
+
+
+########################
+##### Fig A1 & A2 ###### # Run time: 572.9
+########################
+
 # def calculate_for_a_galaxy_mass(Dynamical_mass_k):
 #     total_likelihood__ = 0
-#     print(Dynamical_mass_k + 1, '%')
 #     for STF_j__, SFEN_i__ in itertools.product(range(number_of_STF), range(number_of_SFEN)):
 #         total_likelihood = calculate_likelihood_metal(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal)
 #         # total_likelihood = calculate_likelihood(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal, error_alpha)[3]
@@ -441,7 +737,6 @@ error_alpha_list = [-0.2, 0, 0.2]
 #             if total_likelihood > total_likelihood__:
 #                 total_likelihood__ = total_likelihood
 #                 STF_j = STF_j__
-#     ### cut the plot ###
 #     SFEN_test_1 = round(number_of_SFEN / 10 * 8)
 #     SFEN_test_2 = round(number_of_SFEN / 10 * 2)
 #     total_likelihood_test_1 = calculate_likelihood(SFEN_test_1, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)[
@@ -473,15 +768,25 @@ error_alpha_list = [-0.2, 0, 0.2]
 #     return result
 #
 #
-# fig = plt.figure(10, figsize=(4, 3.5))
-# plt.xlabel(r'log$_{10}$(M$_{*}$ [M$_\odot$])')
-# plt.ylabel(r't$_{\rm sf}$ [Gyr]')
-# plt.xlim(9, 12)
-# plt.ylim(0, 4)
+# fig = plt.figure(10, figsize=(8, 6))
+# ax = fig.add_subplot(111)
+# ax.spines['top'].set_color('none')
+# ax.spines['bottom'].set_color('none')
+# ax.spines['left'].set_color('none')
+# ax.spines['right'].set_color('none')
+# ax.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
+# ax.set_xlabel(r'log$_{10}$(M$_{*}$ [M$_\odot$])')
+# ax.set_ylabel(r't$_{\rm sf}$ [Gyr]')
+# # sc = ax.scatter([0, 0], [0, 0], c=[0, 1], s=1)
+# # clb = plt.colorbar(sc, shrink=1, aspect=40)
+# # clb.set_label('likelihood')
+# plot_number = 0
 # for error_metal, error_alpha in itertools.product(error_metal_list, error_alpha_list):
 #     print(error_metal, error_alpha)
 #     prior_likelihood = math.erfc(abs(error_metal) / standard_deviation_systematic_metal / 2 ** 0.5) * \
 #                        math.erfc(abs(error_alpha) / standard_deviation_systematic_alpha / 2 ** 0.5)
+#     plot_number = plot_number + 1
+#     ax1 = fig.add_subplot(3, 3, plot_number)
 #     SFEN_interpolate_list = []
 #     STF_interpolate_list = []
 #     Dynamical_mass_interpolate_list = []
@@ -489,7 +794,8 @@ error_alpha_list = [-0.2, 0, 0.2]
 #     best_mass_SFEN_list = []  # [(mass1, SFEN1), (mass2, SFEN2)...]
 #
 #     pool = mp.Pool(mp.cpu_count())
-#     results = pool.map(calculate_for_a_galaxy_mass, [Dynamical_mass_k for Dynamical_mass_k in range(number_of_Dynamical_mass)])
+#     results = pool.map(calculate_for_a_galaxy_mass,
+#                        [Dynamical_mass_k for Dynamical_mass_k in range(number_of_Dynamical_mass)])
 #     for i in range(number_of_Dynamical_mass):
 #         # print(results[i])
 #         SFEN_interpolate_list.extend(results[i][0])
@@ -501,129 +807,22 @@ error_alpha_list = [-0.2, 0, 0.2]
 #     best_mass_SFEN_list_sorted = sorted(best_mass_SFEN_list, key=lambda l: l[0])
 #
 #     # print("Plotting...")
-#     plt.scatter(Dynamical_mass_interpolate_list, SFEN_interpolate_list, c=total_likelihood_list, s=10)
-#     plt.plot(*zip(*best_mass_SFEN_list_sorted), c='r', linewidth=0.8)
-#     sc = plt.scatter([0, 0], [0, 0], c=[0, 1], s=1)
-#     clb = plt.colorbar(sc)
-#     clb.set_label('likelihood')
-#     plt.title('[Z/X]_lit+({}); [Mg/Fe]_lit+({})'.format(error_metal, error_alpha), fontsize=8)
-# plt.plot(t, y1, c='k', ls='dashed', label='Thomas05')
-# mass_thomas_list = np.arange(9, 12.1, 0.1)
-# SFT_thomas_list = []
-# for i in mass_thomas_list:
-#     # alpha_interpolate_obs = fun_obs_alpha_mass(i)
-#     alpha_interpolate_obs = -0.459 + 0.062 * i + error_alpha
-#     SFT_thomas = 10**((1/5-alpha_interpolate_obs)*6)
-#     SFT_thomas_list.append(SFT_thomas)
-# plt.plot(mass_thomas_list, SFT_thomas_list, c='k', ls='dotted', label='Thomas05-new')
-# plt.plot(t, y2, c='k', ls='-.', label='Recchi09')
-# plt.legend(prop={'size': 7}, loc='upper right')
+#     ax1.scatter(Dynamical_mass_interpolate_list, SFEN_interpolate_list, c=total_likelihood_list, s=10)
+#     ax1.plot(*zip(*best_mass_SFEN_list_sorted), c='r', linewidth=0.8)
+#     ax1.plot(t, y1, c='k', ls='dashed')
+#     ax1.plot(t, y2, c='k', ls='-.')
+#     ax1.set_xlim(8.4, 12.1)
+#     ax1.set_ylim(0, 8.1)
+#     sc = ax1.scatter([0, 0], [0, 0], c=[0, 1], s=1)
+#     # if plot_number == 3 or plot_number == 6 or plot_number == 9:
+#     #     clb = plt.colorbar(sc)
+#     #     clb.set_label('likelihood')
+#     ax1.set_title('[Z/X]_lit+({}); [Mg/Fe]_lit+({})'.format(error_metal, error_alpha), fontsize=8)
 # plt.tight_layout()
 # if IMF == "Kroupa":
-#     plt.savefig('likelihood_Kroupa.pdf', dpi=250)
+#     plt.savefig('grid_Kroupa.pdf', dpi=250)
 # if IMF == "igimf":
-#     plt.savefig('likelihood_igimf.pdf', dpi=250)
-
-
-########################
-##### Fig A1 & A2 ###### # Run time: 572.9
-########################
-
-def calculate_for_a_galaxy_mass(Dynamical_mass_k):
-    total_likelihood__ = 0
-    for STF_j__, SFEN_i__ in itertools.product(range(number_of_STF), range(number_of_SFEN)):
-        total_likelihood = calculate_likelihood_metal(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal)
-        # total_likelihood = calculate_likelihood(SFEN_i__, STF_j__, Dynamical_mass_k, IMF, error_metal, error_alpha)[3]
-        if not np.isnan(total_likelihood):
-            if total_likelihood > total_likelihood__:
-                total_likelihood__ = total_likelihood
-                STF_j = STF_j__
-    SFEN_test_1 = round(number_of_SFEN / 10 * 8)
-    SFEN_test_2 = round(number_of_SFEN / 10 * 2)
-    total_likelihood_test_1 = calculate_likelihood(SFEN_test_1, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)[
-        3]
-    total_likelihood_test_2 = calculate_likelihood(SFEN_test_2, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)[
-        3]
-    # total_likelihood_test_1 = True
-    # total_likelihood_test_2 = True
-    if not (np.isnan(total_likelihood_test_1) and np.isnan(total_likelihood_test_2)):
-        total_likelihood__ = 0
-        SFEN__ = 0
-        for SFEN_i in range(number_of_SFEN):
-            SFEN_interpolate, STF_interpolate, Dynamical_mass_interpolate, total_likelihood = \
-                calculate_likelihood(SFEN_i, STF_j, Dynamical_mass_k, IMF, error_metal, error_alpha)
-            SFEN_interpolate_list.append(SFEN_interpolate / 100)
-            STF_interpolate_list.append(STF_interpolate)
-            Dynamical_mass_interpolate_list.append(Dynamical_mass_interpolate)
-            total_likelihood_list.append(total_likelihood * prior_likelihood)
-            if not np.isnan(total_likelihood):
-                if total_likelihood > total_likelihood__:
-                    total_likelihood__ = total_likelihood
-                    SFEN__ = SFEN_interpolate
-        if SFEN__ == 0:
-            best_mass_SFEN_list.append([None, None])
-        else:
-            best_mass_SFEN_list.append([Dynamical_mass_interpolate, SFEN__ / 100])
-    result = [SFEN_interpolate_list, STF_interpolate_list, Dynamical_mass_interpolate_list, total_likelihood_list,
-              best_mass_SFEN_list]
-    return result
-
-
-fig = plt.figure(10, figsize=(8, 6))
-ax = fig.add_subplot(111)
-ax.spines['top'].set_color('none')
-ax.spines['bottom'].set_color('none')
-ax.spines['left'].set_color('none')
-ax.spines['right'].set_color('none')
-ax.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
-ax.set_xlabel(r'log$_{10}$(M$_{*}$ [M$_\odot$])')
-ax.set_ylabel(r't$_{\rm sf}$ [Gyr]')
-# sc = ax.scatter([0, 0], [0, 0], c=[0, 1], s=1)
-# clb = plt.colorbar(sc, shrink=1, aspect=40)
-# clb.set_label('likelihood')
-plot_number = 0
-for error_metal, error_alpha in itertools.product(error_metal_list, error_alpha_list):
-    print(error_metal, error_alpha)
-    prior_likelihood = math.erfc(abs(error_metal) / standard_deviation_systematic_metal / 2 ** 0.5) * \
-                       math.erfc(abs(error_alpha) / standard_deviation_systematic_alpha / 2 ** 0.5)
-    plot_number = plot_number + 1
-    ax1 = fig.add_subplot(3, 3, plot_number)
-    SFEN_interpolate_list = []
-    STF_interpolate_list = []
-    Dynamical_mass_interpolate_list = []
-    total_likelihood_list = []
-    best_mass_SFEN_list = []  # [(mass1, SFEN1), (mass2, SFEN2)...]
-
-    pool = mp.Pool(mp.cpu_count())
-    results = pool.map(calculate_for_a_galaxy_mass,
-                       [Dynamical_mass_k for Dynamical_mass_k in range(number_of_Dynamical_mass)])
-    for i in range(number_of_Dynamical_mass):
-        # print(results[i])
-        SFEN_interpolate_list.extend(results[i][0])
-        STF_interpolate_list.extend(results[i][1])
-        Dynamical_mass_interpolate_list.extend(results[i][2])
-        total_likelihood_list.extend(results[i][3])
-        best_mass_SFEN_list.extend(results[i][4])
-    pool.close()
-    best_mass_SFEN_list_sorted = sorted(best_mass_SFEN_list, key=lambda l: l[0])
-
-    # print("Plotting...")
-    ax1.scatter(Dynamical_mass_interpolate_list, SFEN_interpolate_list, c=total_likelihood_list, s=10)
-    ax1.plot(*zip(*best_mass_SFEN_list_sorted), c='r', linewidth=0.8)
-    ax1.plot(t, y1, c='k', ls='dashed')
-    ax1.plot(t, y2, c='k', ls='-.')
-    ax1.set_xlim(8.4, 12.1)
-    ax1.set_ylim(0, 8.1)
-    sc = ax1.scatter([0, 0], [0, 0], c=[0, 1], s=1)
-    # if plot_number == 3 or plot_number == 6 or plot_number == 9:
-    #     clb = plt.colorbar(sc)
-    #     clb.set_label('likelihood')
-    ax1.set_title('[Z/X]_lit+({}); [Mg/Fe]_lit+({})'.format(error_metal, error_alpha), fontsize=8)
-plt.tight_layout()
-if IMF == "Kroupa":
-    plt.savefig('grid_Kroupa.pdf', dpi=250)
-if IMF == "igimf":
-    plt.savefig('grid_igimf.pdf', dpi=250)
+#     plt.savefig('grid_igimf.pdf', dpi=250)
 
 
 
@@ -763,16 +962,16 @@ if IMF == "igimf":
 # plt.plot([], [], label='[Mg/Fe] {}'.format(error_alpha_list[0]), c='r')
 # plt.plot([], [], label='[Mg/Fe] {}'.format(error_alpha_list[1]), c='g')
 # plt.plot([], [], label='[Mg/Fe] {}'.format(error_alpha_list[2]), c='b')
-# plt.plot(t, y1, c='k', ls='dashed', label='Thomas05')
+# plt.plot(t, y1, c='k', ls='dashed', label='Thomas05-ln')
 # plt.plot(t, y2, c='k', ls='-.', label='Recchi09')
 # mass_thomas_list = np.arange(9, 12.1, 0.1)
 # SFT_thomas_list = []
 # for i in mass_thomas_list:
 #     # alpha_interpolate_obs = fun_obs_alpha_mass(i)
 #     alpha_interpolate_obs = -0.459+0.062*i
-#     SFT_thomas = 10**((1/5-alpha_interpolate_obs)*6)
+#     SFT_thomas = math.exp((1/5-alpha_interpolate_obs)*6)
 #     SFT_thomas_list.append(SFT_thomas)
-# plt.plot(mass_thomas_list, SFT_thomas_list, c='k', ls='dotted', label='Thomas05-new')
+# plt.plot(mass_thomas_list, SFT_thomas_list, c='k', ls='dotted', label='Thomas05-ln')
 # # plt.plot([], [], label='[Z/X], [Mg/Fe]:')
 # plt.legend(prop={'size': 7}, loc='upper right')
 # plt.tight_layout()
@@ -796,7 +995,7 @@ if IMF == "igimf":
 # SFT_thomas = np.arange(0.01, 4.1, 0.1)
 # alpha_thomas = []
 # for i in SFT_thomas:
-#     alpha_thomas.append(1/5-1/6*math.log(i, 10))
+#     alpha_thomas.append(1/5-1/6*math.log(i))
 # plt.plot(SFT_thomas, alpha_thomas, c='k', ls='dashed', label='Thomas05')
 # plt.legend(prop={'size': 7}, loc='best')
 # plt.tight_layout()

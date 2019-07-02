@@ -600,7 +600,7 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
 
     # the final time axis is the sorted combination of the two
     time_axis = sorted(list(set(time_axis + time_axis_for_SFH_input)))
-    print("\nSimulation results will be give at galactic age [yr] =\n", time_axis)
+    # print("\nSimulation results will be give at galactic age [yr] =\n", time_axis)
     length_list_time_step = len(time_axis)
 
     ###################

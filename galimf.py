@@ -914,7 +914,7 @@ def function_draw_xi_str_loop(M_str, alpha_1, M_turn, alpha_2, M_turn2, alpha_3)
 
 def function_maximum_number_of_mass_grid(M_str_min, M_str_max):
     global mass_grid_index
-    maximum_number_of_mass_grid = 4
+    maximum_number_of_mass_grid = 4  #
     M_str = M_str_min
     while M_str < M_max:
         maximum_number_of_mass_grid += 1

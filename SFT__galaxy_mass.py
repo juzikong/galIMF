@@ -4,12 +4,13 @@ import element_abundances_solar
 import multiprocessing as mp
 from time import time
 
-def simulate(imf, Log_SFR, SFEN, STF):
 
+def simulate(imf, Log_SFR, SFEN, STF):
     Z_0 = 0.00000001886
     solar_mass_component = "Anders1989_mass"
     Z_solar = element_abundances_solar.function_solar_element_abundances(solar_mass_component, 'Metal')
 
+    start_time = time()
     galevo.galaxy_evol(
         imf=imf,
         STF=STF,  # unrealistic results if more star are forming at a time step than the instantaneous gas mass
@@ -30,6 +31,8 @@ def simulate(imf, Log_SFR, SFEN, STF):
         plot_save=None,
         outflow=None,
         check_igimf=True)
+    end_time = time()
+    print("chemical simulation time:", end_time - start_time)  # Run time: 2387.1988406181335 without multiprocessing
 
     log_Z_0 = round(math.log(Z_0 / Z_solar, 10), 2)
     file = open(
@@ -84,26 +87,45 @@ if __name__ == '__main__':
     start = time()
 
     # generate SFH:
-    SFEN = 100
-    Log_SFR = 4.0
+    SFEN = 50  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
+    Log_SFR = 0.0
     SFH_shape = 'flat'
     location = 0
     skewness = 10
     sfr_tail = 0
     galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
 
+    # STF = 0.4
+    # imf = 'igimf'
+    # simulate(imf, Log_SFR, SFEN, STF)
+
+
+
+    # igimf -1.0 0.0 1.0 2.0 3.0     50   (0.2 0.3) 0.4 1.0 1.4 1.5
+    # igimf -1.0 100    1.0
+    # igimf -1.0 200    0.1 1.0 ... 1.5
+    # igimf -1.0 400    0.5 ...1.5
+    # igimf
+
+
+
+
+
+
+
+
     # simulate for different star transformation fraction
-    STF_list = [0.2, 0.3, 0.4]
+    STF_list = [0.2, 0.3, 0.4, 1.0, 1.4, 1.5]
     imf = 'igimf'
     pool = mp.Pool(mp.cpu_count())
     pool.map(a_pipeline, [STF for STF in STF_list])
     pool.close()
 
-    STF_list = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5]
-    imf = 'Kroupa'
-    pool = mp.Pool(mp.cpu_count())
-    pool.map(a_pipeline, [STF for STF in STF_list])
-    pool.close()
+    # STF_list = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5]
+    # imf = 'Kroupa'
+    # pool = mp.Pool(mp.cpu_count())
+    # pool.map(a_pipeline, [STF for STF in STF_list])
+    # pool.close()
 
     end = time()
     print("Run time:", end - start)

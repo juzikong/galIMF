@@ -420,6 +420,19 @@ error_alpha_list = [0]
 
 
 
+### plot simulated results ###
+
+# if IMF == "igimf":
+#     plt.scatter(Dynamical_mass_igimf, Mass_weighted_stellar_Z_over_X_igimf, s=3, label='[Z/X] igimf')
+#     plt.scatter(Dynamical_mass_igimf, Mass_weighted_stellar_Mg_over_Fe_igimf, s=3, label='[Mg/Fe] igimf')
+#     # plt.errorbar(Dynamical_mass_igimf, middle_Z_over_X_igimf, yerr=error_Z_over_X_igimf, capsize=4, linestyle="None", fmt='o', label='[Z/X] igimf')
+#     # plt.errorbar(Dynamical_mass_igimf, middle_Mg_over_Fe_igimf, yerr=error_Mg_over_Fe_igimf, capsize=4, linestyle="None", fmt='o', label='[Mg/Fe] igimf')
+# elif IMF == "Kroupa":
+#     plt.scatter(Dynamical_mass, Mass_weighted_stellar_Z_over_X, s=3, label='[Z/X] Kroupa-IMF')
+#     plt.scatter(Dynamical_mass, Mass_weighted_stellar_Mg_over_Fe, s=3, label='[Mg/Fe] Kroupa-IMF')
+#     # plt.errorbar(Dynamical_mass, middle_Z_over_X, yerr=error_Z_over_X, capsize=4, linestyle="None", fmt='o', label='[Z/X] Kroupa-IMF')
+#     # plt.errorbar(Dynamical_mass, middle_Mg_over_Fe, yerr=error_Mg_over_Fe, capsize=4, linestyle="None", fmt='o', label='[Mg/Fe] Kroupa-IMF')
+
 
 
 ### find best likelihood and plot ###

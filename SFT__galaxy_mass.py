@@ -78,54 +78,103 @@ def simulate(imf, Log_SFR, SFEN, STF):
 # Parallelizing using Pool.map()
 def a_pipeline(parameter):
     STF = parameter
-    print("\n Start simulation for:", SFEN, STF, Log_SFR, imf)
+    print("\n Start simulation for: SFEN={} STF={} Log_SFR={} imf={}".format(SFEN, STF, Log_SFR, imf))
+    simulate(imf, Log_SFR, SFEN, STF)
+    return
+
+def a_pipeline_pair(parameters):
+    imf = parameters[0]
+    STF = parameters[1]
+    print("\n Start simulation for: SFEN={} STF={} Log_SFR={} imf={}".format(SFEN, STF, Log_SFR, imf))
     simulate(imf, Log_SFR, SFEN, STF)
     return
 
 
 if __name__ == '__main__':
     start = time()
-
-    # generate SFH:
-    SFEN = 50  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
-    Log_SFR = 0.0
-    SFH_shape = 'flat'
-    location = 0
-    skewness = 10
-    sfr_tail = 0
-    galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
-
-    # STF = 0.4
+    # # single simulation
+    # # generate SFH:
+    # SFEN = 100  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
+    # SFH_shape = 'flat'
+    # location = 0
+    # skewness = 10
+    # sfr_tail = 0
+    # Log_SFR = 3.0
+    # STF = 1.1
     # imf = 'igimf'
+    # galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
     # simulate(imf, Log_SFR, SFEN, STF)
 
+    # # a_pipeline
+    # # igimf   1.0 2.0 3.0            50   (0.2 0.3) 0.4 1.0 1.4 1.5
+    # # generate SFH:
+    # SFEN = 100  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
+    # SFH_shape = 'flat'
+    # location = 0
+    # skewness = 10
+    # sfr_tail = 0
+    # Log_SFR_list = [1.0, 2.0]
+    # for Log_SFR in Log_SFR_list:
+    #     galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
+    #     # simulate for different star transformation fraction
+    #     STF_list = [0.2, 0.3, 0.4, 1.0, 1.4, 1.5]  # Run time: 2172.6556639671326
+    #     imf = 'igimf'
+    #     pool = mp.Pool(mp.cpu_count())
+    #     pool.map(a_pipeline, [STF for STF in STF_list])
+    #     pool.close()
 
-
-    # igimf -1.0 0.0 1.0 2.0 3.0     50   (0.2 0.3) 0.4 1.0 1.4 1.5
-    # igimf -1.0 100    1.0
-    # igimf -1.0 200    0.1 1.0 ... 1.5
-    # igimf -1.0 400    0.5 ...1.5
-    # igimf
-
-
-
-
-
-
-
-
-    # simulate for different star transformation fraction
-    STF_list = [0.2, 0.3, 0.4, 1.0, 1.4, 1.5]
-    imf = 'igimf'
-    pool = mp.Pool(mp.cpu_count())
-    pool.map(a_pipeline, [STF for STF in STF_list])
-    pool.close()
-
+    # # a_pipeline
     # STF_list = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5]
     # imf = 'Kroupa'
     # pool = mp.Pool(mp.cpu_count())
     # pool.map(a_pipeline, [STF for STF in STF_list])
     # pool.close()
+
+
+
+
+
+    # # send to Tereza
+    SFEN = 50  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
+    SFH_shape = 'flat'
+    location = 0
+    skewness = 10
+    sfr_tail = 0
+    # Kroupa  0.0  2.0               50     0.2 0.3 0.4 1.0 1.4 1.5
+    imf = 'Kroupa'
+    STF_list = [0.2, 0.3, 0.4, 1.0, 1.4, 1.5]
+    Log_SFR_list = [0.0, 2.0]
+    for Log_SFR in Log_SFR_list:
+        galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
+        # simulate for different star transformation fraction
+        pool = mp.Pool(mp.cpu_count())
+        pool.map(a_pipeline, [STF for STF in STF_list])
+        pool.close()
+    # Kroupa  1.0  3.0               50     0.1 0.4 1.0 1.4 1.5
+    STF_list = [0.1, 0.4, 1.0, 1.4, 1.5]
+    Log_SFR_list = [1.0, 3.0]
+    for Log_SFR in Log_SFR_list:
+        galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
+        # simulate for different star transformation fraction
+        pool = mp.Pool(mp.cpu_count())
+        pool.map(a_pipeline, [STF for STF in STF_list])
+        pool.close()
+    # Kroupa -1.0                    50     0.1 0.2 0.4 1.0 1.4 1.5
+    STF_list = [0.1, 0.2, 0.4, 1.0, 1.4, 1.5]
+    Log_SFR = -1.0
+    galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
+    # simulate for different star transformation fraction
+    pool = mp.Pool(mp.cpu_count())
+    pool.map(a_pipeline, [STF for STF in STF_list])
+    pool.close()
+
+
+
+
+
+
+
+
 
     end = time()
     print("Run time:", end - start)

@@ -538,7 +538,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_comp
     total_star_formed = 10 ** 7 * total_SF
     original_gas_mass = total_star_formed / STF  # in solar mass unit
     if printout_galevo_info == True:
-        print("original_gas_mass =", math.log(original_gas_mass, 10))
+        print("Inital gas mass: 10^{} [solar mass]".format(math.log(original_gas_mass, 10)))
 
     # Create the time steps (x axis) for final output
     time_axis = []
@@ -1800,7 +1800,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_comp
     minutes, seconds = divmod(computation_time_seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
-    print("\n - Simulation complete. Computation time: {} d {} h {} m {} s -\n".format(days, hours, minutes, seconds))
+    print("\n - Simulation complete. Computation time: {} d {} h {} m {} s -".format(days, hours, minutes, seconds))
 
     ###################
     ### output data ###
@@ -2927,7 +2927,7 @@ def function_mass_Kroupa_IMF(mass):
 
 def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar, printout_galevo_info=False):
     if printout_galevo_info == True:
-        print('Generating txt outputs. At the final timestep:\n')
+        print('\nGenerating txt outputs. At the final timestep:\n')
     global time_axis
     # print("time:", time_axis)
 

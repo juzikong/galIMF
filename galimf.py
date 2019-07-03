@@ -83,10 +83,10 @@ def function_galimf(IorS, SFR, alpha3_model, delta_t, M_over_H, I_ecl, M_ecl_U, 
 
 # initialization of floating length arrays
 List_M_ecl_for_xi_ecl = []
-List_xi_ecl = []
+List_xi_ecl = []  # ECMF
 List_M_str_for_xi_str = []
-List_xi_str = []
-List_xi = []
+List_xi_str = []  # embedded cluster scale IMF
+List_xi = []  # galaxy-wide IMF
 
 # --------------------------------------------------------------------------------------------------------------------------------
 

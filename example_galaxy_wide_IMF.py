@@ -79,6 +79,14 @@ I_ecl = 1.  # normalization factor in the Optimal Sampling condition equation
 I_str = 1.  # normalization factor in the Optimal Sampling condition equation
 
 
+# Do you want to save the results
+save_the_results = float(input("\n    Do you want to save the results"
+                       "\n    Input 1 or y means save:"))
+if save_the_results == 1 or save_the_results == 'y' or save_the_results == 'yes' \
+        or save_the_results == 'Y'  or save_the_results == 'YES':
+    printout = True
+else:
+    printout = None
 # --------------------------------------------------------------------------------------------------------------------------------
 # Construct IGIMF:
 # --------------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +112,7 @@ galimf.function_galimf(
     alpha2_model,  # see file 'galimf.py'
     M_turn2,  # IMF power-index change point [solar mass]
     M_str_U,  # star mass upper limit [solar mass]
-    printout=True  # save the generated IMF
+    printout  # save the generated IMF
 )
 print("    - Galaxy-wide IMF calculation complete -")
 
@@ -158,7 +166,7 @@ if OSrequest == "y" or OSrequest == "Y" or OSrequest == "yes" or OSrequest == "Y
         alpha2_model,  # see file 'galimf.py'
         M_turn2,  # IMF power-index change point [solar mass]
         M_str_U,  # star mass upper limit [solar mass]
-        printout=True  # save the generated OSGIMF
+        printout  # save the generated OSGIMF
     )
     print("    - Stellar masses calculation complete - Run time: %ss -" % round((time.time() - start_time), 2))
     # One can easily import data considering number of stars in each mass bin assuming optimal sampling
@@ -217,7 +225,8 @@ plt.xlim(math.log(0.06, 10), math.log(160, 10))
 
 plt.legend(loc='best', ncol=1, fancybox=True, prop={'size': 7})
 plt.tight_layout()
-fig0.savefig('galaxy_wide_IMF_plot.pdf', dpi=250)
+if save_the_results == 1 or save_the_results == 'y' or save_the_results == 'yes':
+    fig0.savefig('galaxy_wide_IMF_plot.pdf', dpi=250)
 
 print("\n    Please check the prompted window for the result."
       "\n    IMFs in the plot are normalized by the same galaxy stellar mass."

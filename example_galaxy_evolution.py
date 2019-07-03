@@ -52,21 +52,12 @@ galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
 print('\nStart galaxy simulation...\n')
 galevo.galaxy_evol(
     imf='igimf',
-    STF=0.3,  # unrealistic results if more star are forming at a time step than the instantaneous gas mass
-    SFEN=SFEN,
-    Z_0=0.00000001886,
-    solar_mass_component="Anders1989_mass",
-    str_yield_table='portinari98',
-    IMF_name='Kroupa',
-    steller_mass_upper_bound=150,
-    time_resolution_in_Myr=1,
-    mass_boundary_observe_low=1.5,
-    mass_boundary_observe_up=8,
-    SFH_model='provided',
-    SFE=0.013,  # This parameter is not applied when SFH_model='provided'.
+    STF=0.3,  # can be larger than 1 since gas is recycled from dying stars but if set too high
+    # unrealistic results may generated if, at a later time step, more star are forming than the available gas mass.
+    SFH_model='provided', SFE=0.013, SFEN=SFEN,  # Parameter "SFE" and "SFEN" is not applied when SFH_model='provided'.
+    printout_galevo_info=True,
+    # plot_show=True,
+    # high_time_resolution=True,
+    # plot_save=True,
     SNIa_ON=True,
-    high_time_resolution=None,
-    plot_show=True,
-    plot_save=None,
-    outflow=None,
-    check_igimf=True)
+    )

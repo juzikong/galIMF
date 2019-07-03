@@ -472,13 +472,13 @@ def yield_from_a_single_10Myr_epoch(epoch_index, this_time, epoch_info, SFH_mode
            Fe_mass_of_this_epoch
 
 
-def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_component='Anders1989_mass',
+def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_component='Anders1989_mass',
                 str_yield_table='portinari98',
                 IMF_name='Kroupa', steller_mass_upper_bound=150,
                 time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
                 SFH_model='provided', SFE=0.05,
-                SNIa_ON=True, SNIa_yield_table='Thielemann1993', solar_abu_table='Anders1989',
-                high_time_resolution=True, plot_show=True, plot_save=None, outflow=None, check_igimf=False):
+                SNIa_ON=True, SNIa_yield_table='Thielemann1993', solar_abu_table='Anders1989', printout_galevo_info=False,
+                high_time_resolution=None, plot_show=None, plot_save=None, outflow=None, check_igimf=False):
     start_time = time.time()
     print('Start new galaxy chemical evolution...')
     ######################
@@ -537,7 +537,8 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
     # Star Trasnformation fraction (STF)
     total_star_formed = 10 ** 7 * total_SF
     original_gas_mass = total_star_formed / STF  # in solar mass unit
-    # print("original_gas_mass =", math.log(original_gas_mass, 10))
+    if printout_galevo_info == True:
+        print("original_gas_mass =", math.log(original_gas_mass, 10))
 
     # Create the time steps (x axis) for final output
     time_axis = []
@@ -600,7 +601,8 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
 
     # the final time axis is the sorted combination of the two
     time_axis = sorted(list(set(time_axis + time_axis_for_SFH_input)))
-    # print("\nSimulation results will be give at galactic age [yr] =\n", time_axis)
+    if printout_galevo_info == True:
+        print("\nSimulation results will be give at galactic age [yr] =\n", time_axis)
     length_list_time_step = len(time_axis)
 
     ###################
@@ -955,9 +957,7 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
                 if S_F_R_of_this_epoch > 0:
                     # Total mass normalized IGIMF and unnormalized other IMFs
                     if imf == 'igimf':
-                        igimf_of_this_epoch = function_get_igimf_for_this_epoch(S_F_R_of_this_epoch, Z_over_X,
-                                                                                this_time, epoch_index,
-                                                                                check_igimf)[0]  # Fe_over_H_number_ratio)
+                        igimf_of_this_epoch = function_get_igimf_for_this_epoch(S_F_R_of_this_epoch, Z_over_X, this_time, epoch_index, check_igimf, printout_galevo_info=printout_galevo_info)[0]  # Fe_over_H_number_ratio)
                     elif imf == 'Kroupa':
                         igimf_of_this_epoch = Kroupa_IMF
                     elif imf == 'Salpeter':
@@ -1255,7 +1255,8 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
                     if age_of_this_epoch == 10 * 10 ** 9 - 1 * 10 ** 7:
                         # print(function_number_SNIa(0, 10 * 10 ** 9, 1, 0))
                         # print("SN number per star in range:", SNIa_number_from_this_epoch_till_this_time/number_in_SNIa_boundary)
-                        print("\nType Ia supernova (SNIa) is activated.\n"
+                        if printout_galevo_info == True:
+                            print("\nType Ia supernova (SNIa) is activated.\n"
                               "Total SNIa number per solar mass of star formed at t = 10Gyr:",
                               SNIa_number_from_this_epoch_till_this_time / M_tot_of_this_epoch)
                     # update the element masses
@@ -1778,7 +1779,7 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
         # go to next time step
         if time_step / 50 > gc_collect_check:
             gc_collect_check += 1
-            print("gc_collect:", gc_collect_check)
+            print("gc_collect...", gc_collect_check)
             gc.collect()
         (time_step) = (time_step + 1)
 
@@ -1825,7 +1826,7 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
     ### output plot ###
     ###################
 
-    text_output(imf, STF, round(math.log(max(SFH_input), 10), 1), SFEN, original_gas_mass, Z_0, Z_solar)
+    text_output(imf, STF, round(math.log(max(SFH_input), 10), 1), SFEN, original_gas_mass, Z_0, Z_solar, printout_galevo_info=printout_galevo_info)
 
     # if output plot applies
     plot_output(plot_show, plot_save, imf, igimf)
@@ -2412,11 +2413,12 @@ def function_get_target_mass(initial_mass, mass_grid_table_number, Mtarget_table
     #         M_tot_est_list += [est_mass]
 
 
-def function_get_igimf_for_this_epoch(SFR_input, Z_over_X, this_time, this_epoch, check_igimf):
+def function_get_igimf_for_this_epoch(SFR_input, Z_over_X, this_time, this_epoch, check_igimf, printout_galevo_info=False):
     # this function calculate igimf, write them in directory Generated_IGIMFs, and import the file
     # with igimf = function_get_igimf_for_every_epoch(SFH_input, Z, Z_solar),
     # the igimf can be called by: igimf.custom_imf(stellar_mass, this_time).
-    function_generate_igimf_file(SFR=SFR_input, Z_over_X=Z_over_X, printout=None, sf_epoch=this_epoch,
+    function_generate_igimf_file(SFR=SFR_input, Z_over_X=Z_over_X, printout_igimf_info=None,
+                                 printout_galevo_info=printout_galevo_info, sf_epoch=this_epoch,
                                  check_igimf=check_igimf)
     if SFR_input == 0:
         igimf_file_name = "igimf_SFR_Zero"
@@ -2447,7 +2449,7 @@ def function_get_igimf_for_this_epoch(SFR_input, Z_over_X, this_time, this_epoch
     return igimf, igimf_file_name
 
 
-def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epoch=0, check_igimf=False):
+def function_generate_igimf_file(SFR=None, Z_over_X=None, printout_igimf_info=False, printout_galevo_info=False, sf_epoch=0, check_igimf=False):
     # This funtion check if the parameter for generating a new IGIMF match an old one,
     # if not, the function generate a new IGIMF and add it to the generated-IGIMF list.
 
@@ -2492,7 +2494,8 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
                                                                         Z_over_X_i_name, math.floor(abs(Z_over_X_d_)))
             igimf_____ = __import__(igimf_file_name)
             if hasattr(igimf_____, "custom_imf"):
-                # print("find IGIMF file '{}' for a galaxy with [Z/X]={}, SFR={}".format(file_path_and_name, round(Z_over_X, 2), SFR))
+                if printout_galevo_info == True:
+                    print("find IGIMF file '{}' for a galaxy with [Z/X]={}, SFR={}".format(file_path_and_name, round(Z_over_X, 2), SFR))
                 exist = 1
         # else:
         #     print("{} is not a file".format(file_path_and_name))
@@ -2509,7 +2512,8 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
         #     (i) = (i + 1)
 
     if exist == 0 and SFR != 0:
-        # print("Generating new IGIMF file '{}' for a galaxy with [Z/X]={}, SFR={}".format(file_path_and_name, Z_over_X, SFR))
+        if printout_galevo_info == True:
+            print("Generating new IGIMF file '{}' for a galaxy with [Z/X]={}, SFR={}".format(file_path_and_name, Z_over_X, SFR))
 
         # # --------------------------------------------------------------------------------------------------------------------------------
         # # add new headline into the list file -- all_igimf_list.txt:
@@ -2565,7 +2569,7 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
         M_turn2 = 1.  # IMF power-index breaking mass [solar mass]
         M_str_U = 150  # star mass upper limit [solar mass]
 
-        if printout == True:
+        if printout_igimf_info == True:
             print("\n - GalIMF run in progress..")
         start_time = time.time()
 
@@ -2573,7 +2577,7 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
         # Construct IGIMF:
         # --------------------------------------------------------------------------------------------------------------------------------
 
-        if printout == True:
+        if printout_igimf_info == True:
             print("\nCalculating IGIMF......")
 
         galimf.function_galimf(
@@ -2595,10 +2599,10 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
             alpha2_model,  # see file 'alpha2.py'
             M_turn2,  # IMF power-index change point [solar mass]
             M_str_U,  # star mass upper limit [solar mass]
-            printout
+            printout_igimf_info
         )
 
-        if printout == True:
+        if printout_igimf_info == True:
             ### Decorate the output file ###
             igimf_raw = np.loadtxt('GalIMF_IGIMF.txt')
             if M_str_U - igimf_raw[-1][0] > 0.01:
@@ -2711,7 +2715,7 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
 
         write_imf_input_epoch()
 
-        if printout == True:
+        if printout_igimf_info == True:
             print("imf_input.py rewritten for SFR = {} and metallicity = {}\n".format(SFR, Z_over_X))
 
             file = open('../gimf_Fe_over_H.txt', 'w')
@@ -2921,8 +2925,9 @@ def function_mass_Kroupa_IMF(mass):
     return m
 
 
-def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
-    # print('\nGenerating txt output files. Result includes:\n')
+def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar, printout_galevo_info=False):
+    if printout_galevo_info == True:
+        print('Generating txt outputs. At the final timestep:\n')
     global time_axis
     # print("time:", time_axis)
 
@@ -2990,16 +2995,20 @@ def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
     # print("Number of star formation event epoch (10^7 yr): ", number_of_sf_epoch)
     # print("modeled star formation duration:", number_of_sf_epoch/100, "Gyr")
     global total_energy_release_list
-    # print("total number of SN: 10^", round(math.log(total_energy_release_list[-1], 10), 1))
+    if printout_galevo_info == True:
+        print("total number of SN: 10^", round(math.log(total_energy_release_list[-1], 10), 1))
 
     global BH_mass_list, NS_mass_list, WD_mass_list, remnant_mass_list, stellar_mass_list, ejected_gas_mass_list
     stellar_mass = round(math.log(stellar_mass_list[-1], 10), 4)
-    # print("Mass of all alive stars at final time: 10 ^", stellar_mass)
+    if printout_galevo_info == True:
+        print("Mass of all alive stars: 10 ^", stellar_mass)
     downsizing_relation__star_formation_duration = round(10 ** (2.38 - 0.24 * stellar_mass), 4)  # Recchi 2009
-    # print("star formation duration (downsizing relation):", downsizing_relation__star_formation_duration, "Gyr")
+    if printout_galevo_info == True:
+        print("star formation duration (downsizing relation):", downsizing_relation__star_formation_duration, "Gyr")
 
     stellar_and_remnant_mass = round(math.log(stellar_mass_list[-1] + remnant_mass_list[-1], 10), 4)
-    # print("Mass of stars and remnants at final time: 10 ^", stellar_and_remnant_mass)
+    if printout_galevo_info == True:
+        print("Mass of stars and remnants: 10 ^", stellar_and_remnant_mass)
 
     total_mas_in_box = original_gas_mass
 
@@ -3013,38 +3022,40 @@ def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
     # # print("the gravitational binding energy: 10^", log_binding_energy, "erg")
 
     global Fe_over_H_list, stellar_Fe_over_H_list, stellar_Fe_over_H_list_luminosity_weighted
-    # print("Gas [Fe/H]:", round(Fe_over_H_list[-1], 3))
-    # print("Stellar [Fe/H]:", round(stellar_Fe_over_H_list[-1], 3))
+    if printout_galevo_info == True:
+        print("Gas phase [Fe/H]:", round(Fe_over_H_list[-1], 3))
+        print("Mass-weighted stellar [Fe/H]:", round(stellar_Fe_over_H_list[-1], 3))
 
     global Mg_over_Fe_list, stellar_Mg_over_Fe_list, stellar_Mg_over_Fe_list_luminosity_weighted
-    # print("Gas [Mg/Fe]:", round(Mg_over_Fe_list[-1], 3))
-    # print("Stellar [Mg/Fe]:", round(stellar_Mg_over_Fe_list[-1], 3))
+    if printout_galevo_info == True:
+        print("Gas phase [Mg/Fe]:", round(Mg_over_Fe_list[-1], 3))
+        print("Mass-weighted stellar [Mg/Fe]:", round(stellar_Mg_over_Fe_list[-1], 3))
 
     global O_over_Fe_list, stellar_O_over_Fe_list, stellar_O_over_Fe_list_luminosity_weighted
-    # print("Gas [O/Fe]:", round(O_over_Fe_list[-1], 3))
-    # print("Stellar [O/Fe]:", round(stellar_O_over_Fe_list[-1], 3))
+    if printout_galevo_info == True:
+        print("Gas phase [O/Fe]:", round(O_over_Fe_list[-1], 3))
+        print("Mass-weighted stellar [O/Fe]:", round(stellar_O_over_Fe_list[-1], 3))
 
     global Mg_over_H_list, stellar_Mg_over_H_list, stellar_Mg_over_H_list_luminosity_weighted
-    # print("Gas [Mg/H]:", round(Mg_over_H_list[-1], 3))
-    # print("Stellar [Mg/H]:", round(stellar_Mg_over_H_list[-1], 3))
+    if printout_galevo_info == True:
+        print("Gas phase [Mg/H]:", round(Mg_over_H_list[-1], 3))
+        print("Mass-weighted stellar [Mg/H]:", round(stellar_Mg_over_H_list[-1], 3))
 
     global O_over_H_list, stellar_O_over_H_list, stellar_O_over_H_list_luminosity_weighted
-    # print("Gas [O/H]:", round(O_over_H_list[-1], 3))
-    # print("Stellar [O/H]:", round(stellar_O_over_H_list[-1], 3))
+    if printout_galevo_info == True:
+        print("Gas phase [O/H]:", round(O_over_H_list[-1], 3))
+        print("Mass-weighted stellar [O/H]:", round(stellar_O_over_H_list[-1], 3))
 
     global gas_Z_over_X_list, stellar_Z_over_X_list, stellar_Z_over_X_list_luminosity_weighted, stellar_Z_over_H_list
-    # print("Gas metallicity:", round(gas_Z_over_X_list[-1], 3))
-    # print("Stellar metallicity:", round(stellar_Z_over_X_list[-1], 3))
-    # print("Stellar [Z/H]:", round(stellar_Z_over_H_list[-1], 3))
+    if printout_galevo_info == True:
+        print("Gas phase [Z/X]:", round(gas_Z_over_X_list[-1], 3))
+        print("Mass-weighted stellar [Z/X]:", round(stellar_Z_over_X_list[-1], 3))
+        # print("Stellar [Z/H]:", round(stellar_Z_over_H_list[-1], 3))
 
     log_Z_0 = round(math.log(Z_0 / Z_solar, 10), 2)
     file = open(
         'simulation_results_from_galaxy_evol/imf{}STF{}log_SFR{}SFEN{}Z_0{}.txt'.format(imf, STF, SFR, SFEN,
                                                                                                  log_Z_0), 'w')
-
-    print("simulation results saved in the file: "
-          "simulation_results_from_galaxy_evol/imf{}STF{}log_SFR{}SFEN{}Z_0{}.txt".format(imf, STF, SFR, SFEN,
-                                                                                                   log_Z_0))
 
     file.write("# Number of star formation event epoch (10^7 yr):\n")
     file.write("%s\n" % number_of_sf_epoch)
@@ -3247,7 +3258,9 @@ def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
     file.write("\n")
 
     file.close()
-
+    print("\nSimulation results for all time steps saved in the file: "
+          "simulation_results_from_galaxy_evol/imf{}STF{}log_SFR{}SFEN{}Z_0{}.txt".format(imf, STF, SFR, SFEN,
+                                                                                          log_Z_0))
     return
 
 
@@ -4448,7 +4461,7 @@ if __name__ == '__main__':
                 str_yield_table='portinari98', IMF_name='Kroupa', steller_mass_upper_bound=150,
                 time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
                 SFH_model='provided', SFE=0.013, SNIa_ON=True, SNIa_yield_table='Seitenzahl2013',
-                solar_abu_table='Anders1989',
+                solar_abu_table='Anders1989', printout_galevo_info=False,
                 high_time_resolution=None, plot_show=None, plot_save=None, outflow=None, check_igimf=True)
     # Use plot_show=True on persenal computer to view the simualtion result immidiately after the computation
     # Use plot_show=None if running on a computer cluster to avoid possible issues.

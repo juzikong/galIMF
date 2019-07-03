@@ -480,7 +480,7 @@ def galaxy_evol(imf='igimf', STF=1, SFEN=1, Z_0=0.000000134, solar_mass_componen
                 SNIa_ON=True, SNIa_yield_table='Thielemann1993', solar_abu_table='Anders1989',
                 high_time_resolution=True, plot_show=True, plot_save=None, outflow=None, check_igimf=False):
     start_time = time.time()
-
+    print('Start new galaxy chemical evolution...')
     ######################
     # If imf='igimf', the model will use variable IMF, imf='Kroupa' will use Kroupa IMF
     # A 1 in SFH.txt stand for SFR = 1 [solar mass/year] in a 10 Myr epoch.
@@ -2421,8 +2421,16 @@ def function_get_igimf_for_this_epoch(SFR_input, Z_over_X, this_time, this_epoch
     if SFR_input == 0:
         igimf_file_name = "igimf_SFR_Zero"
     else:
-        igimf_file_name = "igimf_SFR_{}_Fe_over_H_{}".format(round(math.log(SFR_input, 10) * 1000),
-                                                             round(Z_over_X * 100000000000))
+        Z_over_X_text = '{}'.format(Z_over_X)
+        Z_over_X_digits = Z_over_X_text[::-1].find('.')
+        Z_over_X_d, Z_over_X_i = math.modf(Z_over_X)
+        Z_over_X_d_ = Z_over_X_d * 10 ** Z_over_X_digits
+        if round(Z_over_X_i) < 0:
+            Z_over_X_i_name = "m{}".format(-round(Z_over_X_i))
+        else:
+            Z_over_X_i_name = round(Z_over_X_i)
+        igimf_file_name = "igimf_1000logSFR_{}_metallicity_{}_dot_{}".format(round(math.log(SFR_input, 10) * 1000),
+                                                                    Z_over_X_i_name, math.floor(abs(Z_over_X_d_)))
     igimf = __import__(igimf_file_name)
     # import os
     # if os.path.isfile('Generated_IGIMFs/' + igimf_file_name + '.py'):
@@ -2459,8 +2467,16 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
         if os.path.isdir(Generated_IGIMFs_path) == False:
             cwd = os.getcwd()
             Generated_IGIMFs_path = cwd + '/galIMF/Generated_IGIMFs'
-    file_name = '/igimf_SFR_{}_Fe_over_H_{}.py'.format(round(math.log(SFR, 10) * 1000),
-                                                       round(Z_over_X * 100000000000))
+    Z_over_X_text = '{}'.format(Z_over_X)
+    Z_over_X_digits = Z_over_X_text[::-1].find('.')
+    Z_over_X_d, Z_over_X_i = math.modf(Z_over_X)
+    Z_over_X_d_ = Z_over_X_d * 10 ** Z_over_X_digits
+    if round(Z_over_X_i) < 0:
+        Z_over_X_i_name = "m{}".format(-round(Z_over_X_i))
+    else:
+        Z_over_X_i_name = round(Z_over_X_i)
+    file_name = '/igimf_1000logSFR_{}_metallicity_{}_dot_{}.py'.format(round(math.log(SFR, 10) * 1000),
+                                                              Z_over_X_i_name, math.floor(abs(Z_over_X_d_)))
     file_path_and_name = Generated_IGIMFs_path + file_name
 
     # --------------------------------------------------------------------------------------------------------------------------------
@@ -2472,8 +2488,8 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
     if check_igimf == True:
 
         if os.path.isfile(file_path_and_name):
-            igimf_file_name = "igimf_SFR_{}_Fe_over_H_{}".format(round(math.log(SFR, 10) * 1000),
-                                                                 round(Z_over_X * 100000000000))
+            igimf_file_name = "igimf_1000logSFR_{}_metallicity_{}_dot_{}".format(round(math.log(SFR, 10) * 1000),
+                                                                        Z_over_X_i_name, math.floor(abs(Z_over_X_d_)))
             igimf_____ = __import__(igimf_file_name)
             if hasattr(igimf_____, "custom_imf"):
                 # print("find IGIMF file '{}' for a galaxy with [Z/X]={}, SFR={}".format(file_path_and_name, round(Z_over_X, 2), SFR))
@@ -2615,7 +2631,7 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
         global length_of_igimf
         length_of_igimf = len(igimf)
 
-        def write_imf_input2():
+        def write_imf_input():
             global file, masses, igimf
             if SFR == 0:
                 file = open('Generated_IGIMFs/igimf_SFR_Zero.py', 'w')
@@ -2623,9 +2639,14 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
                 file.write("    return 0\n")
                 file.close()
             else:
-                file = open('Generated_IGIMFs/igimf_SFR_{}_Fe_over_H_{}.py'.format(round(math.log(SFR, 10) * 1000),
-                                                                                   round(Z_over_X * 100000000000)), 'w')
-                file.write("# File to define a custom IMF\n"
+                if round(Z_over_X_i) < 0:
+                    Z_over_X_i_name = "m{}".format(-round(Z_over_X_i))
+                else:
+                    Z_over_X_i_name = round(Z_over_X_i)
+                file = open('Generated_IGIMFs/igimf_1000logSFR_{}_metallicity_{}_dot_{}.py'.format(round(math.log(SFR, 10) * 1000),
+                                                                                          Z_over_X_i_name,
+                                                                                          math.floor(abs(Z_over_X_d_))), 'w')
+                file.write("# File to define a custom IMF with 1000*log_10(SFR) value and [Z/X] value specified in the file title\n"
                            "# The return value represents the chosen IMF value for the input mass\n\n\n")
                 file.write("def custom_imf(mass, time):  # there is no time dependence for IGIMF\n")
                 file.write("    if mass < 0.08:\n")
@@ -2638,13 +2659,13 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
                     k = (igimf[0] - igimf[1]) / (masses[0] - masses[1])
                     b = igimf[0] - k * masses[0]
                 file.write("        return {} * mass + {}\n".format(k, b))
-                write_imf_input_middle2(1)
+                write_imf_input_middle(1)
                 file.write("    else:\n")
                 file.write("        return 0\n")
                 file.close()
             return
 
-        def write_imf_input_middle2(i):
+        def write_imf_input_middle(i):
             global file, length_of_igimf
             while i < length_of_igimf - 1:
                 file.write("    elif mass < %s:\n" % masses[i + 1])
@@ -2655,12 +2676,12 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
                     k = (igimf[i] - igimf[i + 1]) / (masses[i] - masses[i + 1])
                     b = igimf[i] - k * masses[i]
                 file.write("        return {} * mass + {}\n".format(k, b))
-                (i) = (i + 3)
+                (i) = (i + 1)
             return
 
-        write_imf_input2()
+        write_imf_input()
 
-        def write_imf_input3():
+        def write_imf_input_epoch():
             global file, masses, igimf
             if SFR == 0:
                 file = open('Generated_IGIMFs/igimf_epoch_{}.py'.format(sf_epoch), 'w')
@@ -2669,7 +2690,7 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
                 file.close()
             else:
                 file = open('Generated_IGIMFs/igimf_epoch_{}.py'.format(sf_epoch), 'w')
-                file.write("# File to define a custom IMF\n"
+                file.write("# File to define a custom IMF with 1000*log_10(SFR) value and [Z/X] value specified in the file title\n"
                            "# The return value represents the chosen IMF value for the input mass\n\n\n")
                 file.write("def custom_imf(mass, time):  # there is no time dependence for IGIMF\n")
                 file.write("    if mass < 0.08:\n")
@@ -2682,13 +2703,13 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
                     k = (igimf[0] - igimf[1]) / (masses[0] - masses[1])
                     b = igimf[0] - k * masses[0]
                 file.write("        return {} * mass + {}\n".format(k, b))
-                write_imf_input_middle2(1)
+                write_imf_input_middle(1)
                 file.write("    else:\n")
                 file.write("        return 0\n")
                 file.close()
             return
 
-        write_imf_input3()
+        write_imf_input_epoch()
 
         if printout == True:
             print("imf_input.py rewritten for SFR = {} and metallicity = {}\n".format(SFR, Z_over_X))
@@ -2901,7 +2922,7 @@ def function_mass_Kroupa_IMF(mass):
 
 
 def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
-    print('\nGenerating txt output files. Result includes:\n')
+    # print('\nGenerating txt output files. Result includes:\n')
     global time_axis
     # print("time:", time_axis)
 
@@ -2973,12 +2994,12 @@ def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
 
     global BH_mass_list, NS_mass_list, WD_mass_list, remnant_mass_list, stellar_mass_list, ejected_gas_mass_list
     stellar_mass = round(math.log(stellar_mass_list[-1], 10), 4)
-    print("Mass of all alive stars at final time: 10 ^", stellar_mass)
+    # print("Mass of all alive stars at final time: 10 ^", stellar_mass)
     downsizing_relation__star_formation_duration = round(10 ** (2.38 - 0.24 * stellar_mass), 4)  # Recchi 2009
     # print("star formation duration (downsizing relation):", downsizing_relation__star_formation_duration, "Gyr")
 
     stellar_and_remnant_mass = round(math.log(stellar_mass_list[-1] + remnant_mass_list[-1], 10), 4)
-    print("Mass of stars and remnants at final time: 10 ^", stellar_and_remnant_mass)
+    # print("Mass of stars and remnants at final time: 10 ^", stellar_and_remnant_mass)
 
     total_mas_in_box = original_gas_mass
 
@@ -3021,7 +3042,7 @@ def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
         'simulation_results_from_galaxy_evol/imf{}STF{}log_SFR{}SFEN{}Z_0{}.txt'.format(imf, STF, SFR, SFEN,
                                                                                                  log_Z_0), 'w')
 
-    print("\nsimulation results saved in the file:\n"
+    print("simulation results saved in the file: "
           "simulation_results_from_galaxy_evol/imf{}STF{}log_SFR{}SFEN{}Z_0{}.txt".format(imf, STF, SFR, SFEN,
                                                                                                    log_Z_0))
 
@@ -3091,7 +3112,7 @@ def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
     file.write("\n")
 
     Mass_weighted_stellar_Mg_over_Fe = stellar_Mg_over_Fe_list[-1]
-    print("Mass-weighted stellar [Mg/Fe] at final time:", Mass_weighted_stellar_Mg_over_Fe)
+    # print("Mass-weighted stellar [Mg/Fe] at final time:", Mass_weighted_stellar_Mg_over_Fe)
 
     file.write("# Gas [O/Fe]:\n")
     i = 0
@@ -3150,7 +3171,7 @@ def text_output(imf, STF, SFR, SFEN, original_gas_mass, Z_0, Z_solar):
     file.write("\n")
 
     Mass_weighted_stellar_metallicity = stellar_Z_over_X_list[-1]
-    print("Mass-weighted stellar [Z/X] at final time:", Mass_weighted_stellar_metallicity)
+    # print("Mass-weighted stellar [Z/X] at final time:", Mass_weighted_stellar_metallicity)
 
     if SNIa_energy_release_list[-1] < 10 ** (-10):
         SNIa_energy_release_list[-1] = 10 ** (-10)

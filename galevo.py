@@ -2421,8 +2421,8 @@ def function_get_igimf_for_this_epoch(SFR_input, Z_over_X, this_time, this_epoch
     if SFR_input == 0:
         igimf_file_name = "igimf_SFR_Zero"
     else:
-        igimf_file_name = "igimf_SFR_{}_Fe_over_H_{}".format(round(math.log(SFR_input, 10) * 100000),
-                                                             round(Z_over_X * 100000))
+        igimf_file_name = "igimf_SFR_{}_Fe_over_H_{}".format(round(math.log(SFR_input, 10) * 1000),
+                                                             round(Z_over_X * 100000000000))
     igimf = __import__(igimf_file_name)
     # import os
     # if os.path.isfile('Generated_IGIMFs/' + igimf_file_name + '.py'):
@@ -2459,8 +2459,8 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
         if os.path.isdir(Generated_IGIMFs_path) == False:
             cwd = os.getcwd()
             Generated_IGIMFs_path = cwd + '/galIMF/Generated_IGIMFs'
-    file_name = '/igimf_SFR_{}_Fe_over_H_{}.py'.format(round(math.log(SFR, 10) * 100000),
-                                                       round(Z_over_X * 100000))
+    file_name = '/igimf_SFR_{}_Fe_over_H_{}.py'.format(round(math.log(SFR, 10) * 1000),
+                                                       round(Z_over_X * 100000000000))
     file_path_and_name = Generated_IGIMFs_path + file_name
 
     # --------------------------------------------------------------------------------------------------------------------------------
@@ -2472,8 +2472,8 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
     if check_igimf == True:
 
         if os.path.isfile(file_path_and_name):
-            igimf_file_name = "igimf_SFR_{}_Fe_over_H_{}".format(round(math.log(SFR, 10) * 100000),
-                                                                 round(Z_over_X * 100000))
+            igimf_file_name = "igimf_SFR_{}_Fe_over_H_{}".format(round(math.log(SFR, 10) * 1000),
+                                                                 round(Z_over_X * 100000000000))
             igimf_____ = __import__(igimf_file_name)
             if hasattr(igimf_____, "custom_imf"):
                 # print("find IGIMF file '{}' for a galaxy with [Z/X]={}, SFR={}".format(file_path_and_name, round(Z_over_X, 2), SFR))
@@ -2623,8 +2623,8 @@ def function_generate_igimf_file(SFR=None, Z_over_X=None, printout=False, sf_epo
                 file.write("    return 0\n")
                 file.close()
             else:
-                file = open('Generated_IGIMFs/igimf_SFR_{}_Fe_over_H_{}.py'.format(round(math.log(SFR, 10) * 100000),
-                                                                                   round(Z_over_X * 100000)), 'w')
+                file = open('Generated_IGIMFs/igimf_SFR_{}_Fe_over_H_{}.py'.format(round(math.log(SFR, 10) * 1000),
+                                                                                   round(Z_over_X * 100000000000)), 'w')
                 file.write("# File to define a custom IMF\n"
                            "# The return value represents the chosen IMF value for the input mass\n\n\n")
                 file.write("def custom_imf(mass, time):  # there is no time dependence for IGIMF\n")

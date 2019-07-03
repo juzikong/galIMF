@@ -10,7 +10,6 @@ def simulate(imf, Log_SFR, SFEN, STF):
     solar_mass_component = "Anders1989_mass"
     Z_solar = element_abundances_solar.function_solar_element_abundances(solar_mass_component, 'Metal')
 
-    start_time = time()
     galevo.galaxy_evol(
         imf=imf,
         STF=STF,  # unrealistic results if more star are forming at a time step than the instantaneous gas mass
@@ -31,8 +30,6 @@ def simulate(imf, Log_SFR, SFEN, STF):
         plot_save=None,
         outflow=None,
         check_igimf=True)
-    end_time = time()
-    print("chemical simulation time:", end_time - start_time)  # Run time: 2387.1988406181335 without multiprocessing
 
     log_Z_0 = round(math.log(Z_0 / Z_solar, 10), 2)
     file = open(
@@ -78,7 +75,7 @@ def simulate(imf, Log_SFR, SFEN, STF):
 # Parallelizing using Pool.map()
 def a_pipeline(parameter):
     STF = parameter
-    print("\n Start simulation for: SFEN={} STF={} Log_SFR={} imf={}".format(SFEN, STF, Log_SFR, imf))
+    print("\nStart simulation for: SFEN={} STF={} Log_SFR={} imf={}".format(SFEN, STF, Log_SFR, imf))
     simulate(imf, Log_SFR, SFEN, STF)
     return
 
@@ -86,7 +83,7 @@ def a_pipeline(parameter):
 def a_pipeline_pair(parameters):
     imf = parameters[0]
     STF = parameters[1]
-    print("\n Start simulation for: SFEN={} STF={} Log_SFR={} imf={}".format(SFEN, STF, Log_SFR, imf))
+    print("\nStart simulation for: SFEN={} STF={} Log_SFR={} imf={}".format(SFEN, STF, Log_SFR, imf))
     simulate(imf, Log_SFR, SFEN, STF)
     return
 
@@ -127,7 +124,7 @@ if __name__ == '__main__':
     # a_pipeline
     # igimf   1.0 2.0 3.0            50   (0.2 0.3) 0.4 1.0 1.4 1.5
     # generate SFH:
-    SFEN = 10  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
+    SFEN = 5  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
     SFH_shape = 'flat'
     location = 0
     skewness = 10
@@ -139,7 +136,7 @@ if __name__ == '__main__':
         galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
         # simulate for different star transformation fraction
         STF_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]  # Run time: 2172.6556639671326
-        STF_list = [1]  # Run time: 2172.6556639671326
+        STF_list = [0.1]  # Run time: 2172.6556639671326
         pool = mp.Pool(mp.cpu_count())
         pool.map(a_pipeline, [STF for STF in STF_list])
         pool.close()
@@ -150,7 +147,6 @@ if __name__ == '__main__':
     # pool = mp.Pool(mp.cpu_count())
     # pool.map(a_pipeline, [STF for STF in STF_list])
     # pool.close()
-
 
     # # # a_pipeline_pair
     # # generate SFH:
@@ -173,8 +169,5 @@ if __name__ == '__main__':
     #     pool.map(a_pipeline_pair, [parameters for parameters in input_parameters_list])
     #     pool.close()
 
-
-
-
     end = time()
-    print("Run time:", end - start)
+    print("All complete. Run time:", end - start)

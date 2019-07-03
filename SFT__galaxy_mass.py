@@ -93,6 +93,24 @@ def a_pipeline_pair(parameters):
 
 if __name__ == '__main__':
     start = time()
+
+    # SFEN = 25  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
+    # SFH_shape = 'flat'
+    # location = 0
+    # skewness = 10
+    # sfr_tail = 0
+    # Log_SFR_list = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    # # Log_SFR_list = [1.0]
+    # imf = 'igimf'
+    # STF_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]  # Run time: 2172.6556639671326
+    # for Log_SFR in Log_SFR_list:
+    #     galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
+    #     # simulate for different star transformation fraction
+    #     for STF in STF_list:
+    #         print("\n Start simulation for: SFEN={} STF={} Log_SFR={} imf={}".format(SFEN, STF, Log_SFR, imf))
+    #         simulate(imf, Log_SFR, SFEN, STF)
+
+
     # # single simulation
     # # generate SFH:
     # SFEN = 100  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
@@ -109,17 +127,19 @@ if __name__ == '__main__':
     # a_pipeline
     # igimf   1.0 2.0 3.0            50   (0.2 0.3) 0.4 1.0 1.4 1.5
     # generate SFH:
-    SFEN = 50  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
+    SFEN = 10  # Parallelizing only work for the same SFEN since SFH.txt file is the same!
     SFH_shape = 'flat'
     location = 0
     skewness = 10
     sfr_tail = 0
-    Log_SFR_list = [3.0]
+    imf = 'igimf'
+    Log_SFR_list = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    Log_SFR_list = [0.0]
     for Log_SFR in Log_SFR_list:
         galevo.generate_SFH(SFH_shape, Log_SFR, SFEN, sfr_tail, skewness, location)
         # simulate for different star transformation fraction
-        STF_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5]  # Run time: 2172.6556639671326
-        imf = 'igimf'
+        STF_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]  # Run time: 2172.6556639671326
+        STF_list = [1]  # Run time: 2172.6556639671326
         pool = mp.Pool(mp.cpu_count())
         pool.map(a_pipeline, [STF for STF in STF_list])
         pool.close()

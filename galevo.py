@@ -1428,9 +1428,9 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_comp
 
         # go to next time step
         if time_step / 50 > gc_collect_check:
-            gc_collect_check += 1
-            print("gc_collect...", gc_collect_check)
+            print("Release unreferenced memory...")
             gc.collect()
+            gc_collect_check += 1
         (time_step) = (time_step + 1)
 
     ######################

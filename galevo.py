@@ -30,6 +30,7 @@ def yield_from_a_single_10Myr_epoch(epoch_index, this_time, epoch_info, SFH_mode
         total_gas_mass_at_this_time, SFE, imf, Z_over_X, check_igimf, \
         steller_mass_upper_bound, Z_gas_this_time_step, Z_list, Z_list_2, Z_list_3, str_yield_table, \
         length_list_SFH_input, metal_mass_fraction_in_gas, SNIa_ON, SNIa_yield_table, STF, maximum_SFR, SFEN, log_Z_0, printout_galevo_info):
+    print(this_time, epoch_index)
     epoch_info_length = len(epoch_info)
     input_SFR = SFH_input[epoch_index]
     new_all_sfr = None
@@ -1017,26 +1018,8 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_comp
                 all_sf_imf.append(new_sf_imf)
         pool.close()
 
-        # 0extend_epoch_index, 1new_epoch_info[0], new_epoch_info[1], new_epoch_info[2], new_epoch_info[3], \
-        # new_epoch_info[4], new_epoch_info[5], new_epoch_info[6], new_epoch_info[7], new_epoch_info[8], \
-        # new_epoch_info[9], new_epoch_info[10], new_epoch_info[11], new_epoch_info[12], 14new_epoch_info[13], \
-        # 15M_tot_of_this_epoch, SNII_number_of_this_epoch, SNII_energy_release_of_this_epoch, \
-        # 18Fe_mass_of_this_epoch, Mg_mass_of_this_epoch, O_mass_of_this_epoch, \
-        # 21SNIa_number_from_this_epoch_till_this_time, SNIa_energy_release_from_this_epoch_till_this_time, \
-        # 23stellar_mass_of_a_epoch_at_a_time_step, stellar_metal_mass_of_this_epoch, stellar_H_mass_of_this_epoch, \
-        # 26stellar_He_mass_of_this_epoch, stellar_O_mass_of_this_epoch, stellar_Mg_mass_of_this_epoch, \
-        # 29stellar_Fe_mass_of_this_epoch, \
-        # 30stellar_luminosity_of_a_epoch_at_a_time_step, stellar_metal_luminosity_of_this_epoch, \
-        # 32stellar_H_luminosity_of_this_epoch, stellar_He_luminosity_of_this_epoch, stellar_O_luminosity_of_this_epoch, \
-        # 35stellar_Mg_luminosity_of_this_epoch, stellar_Fe_luminosity_of_this_epoch, \
-        # 37BH_mass_of_this_epoch, NS_mass_of_this_epoch, WD_mass_of_this_epoch, remnant_mass_of_this_epoch, \
-        # 41ejected_gas_mass_of_this_epoch, metal_mass_of_this_epoch, \
-        # 43H_mass_of_this_epoch, He_mass_of_this_epoch, O_mass_of_this_epoch, Mg_mass_of_this_epoch, \
-        # 47Fe_mass_of_this_epoch, new_all_sfr, new_all_sf_imf
-
         # output of this time step
         total_energy_release = SNIa_energy_release + SNII_energy_release
-
         ### yeilds at this time step from all SF epoch:
         ejected_gas_mass_at_this_time = ejected_gas_mass_till_this_time - ejected_gas_mass_till_last_time
         ejected_metal_mass_at_this_time = ejected_metal_mass_till_this_time - ejected_metal_mass_till_last_time
@@ -1084,6 +1067,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_comp
         else:
             lockup_and_outflow_mass = M_tot_of_this_time
         total_gas_mass_at_this_time = total_gas_mass_at_last_time - lockup_and_outflow_mass + ejected_gas_mass_at_this_time
+        print("total_gas_mass_at_this_time", total_gas_mass_at_this_time)
         if total_gas_mass_at_this_time < 0.0001:
             total_gas_mass_at_this_time = 0.0001
         total_metal_mass_at_this_time = total_metal_mass_in_gas_at_last_time - lockup_and_outflow_mass * \
@@ -1149,6 +1133,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_comp
         all_masses = total_H_mass_at_this_time + total_He_mass_at_this_time + total_metal_mass_at_this_time
         X_for_H = total_H_mass_at_this_time / all_masses
         Y_for_He = total_He_mass_at_this_time / all_masses
+        print("all_masses", all_masses)
         Z_for_metal = total_metal_mass_at_this_time / all_masses
         mean_molecular_weight = 1 / (2 * X_for_H + 3 / 4 * Y_for_He + Z_for_metal / 2) * \
                                 element_weight_table.function_element_weight("H") / 6.022140857 / 1.9891

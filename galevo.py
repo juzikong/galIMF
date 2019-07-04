@@ -65,10 +65,10 @@ def yield_from_a_single_10Myr_epoch(epoch_index, this_time, epoch_info, SFH_mode
                 new_igimf = function_get_igimf_for_this_epoch(S_F_R_of_this_epoch, Z_over_X, this_time, epoch_index, check_igimf, printout_galevo_info=printout_galevo_info)  # Fe_over_H_number_ratio)
                 igimf_of_this_epoch = new_igimf[0]
                 igimf_of_this_epoch_record = "{}".format(new_igimf[1])  # Fe_over_H_number_ratio)
-                file = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(gwimf, round(STF*100), round(maximum_SFR*100), SFEN), 'r')
+                file = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(imf, round(STF*100), round(maximum_SFR*100), SFEN), 'r')
                 old_lines = file.read()
                 file.close()
-                file = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(gwimf, round(STF*100), round(maximum_SFR*100), SFEN), 'w')
+                file = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(imf, round(STF*100), round(maximum_SFR*100), SFEN), 'w')
                 new_line = old_lines + "{} {}\n".format(epoch_index, igimf_of_this_epoch_record)
                 file.write(new_line)
                 file.close()
@@ -186,14 +186,14 @@ def yield_from_a_single_10Myr_epoch(epoch_index, this_time, epoch_info, SFH_mode
             metal_in_gas = metal_mass_fraction_in_gas
         else:  # if SFR == 0
 
-            file_r = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(gwimf, round(STF*100), round(maximum_SFR*100), SFEN), 'r')
+            file_r = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(imf, round(STF*100), round(maximum_SFR*100), SFEN), 'r')
             old_lines = file_r.read()
             file_r.close()
 
             igimf_of_this_epoch_record = "imf_for_zero_SFR"
             new_line = old_lines + "{} {}\n".format(epoch_index, igimf_of_this_epoch_record)
 
-            file_w = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(gwimf, round(STF*100), round(maximum_SFR*100), SFEN), 'w')
+            file_w = open('Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(imf, round(STF*100), round(maximum_SFR*100), SFEN), 'w')
             file_w.write(new_line)
             file_w.close()
             time_of_the_epoch_in_Gyr = epoch_index / 100
@@ -700,7 +700,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=100, Z_0=0.000000134, solar_mass_comp
     log_Z_0 = round(math.log(Z_0 / Z_solar, 10), 2)
 
     file = open(
-        'Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(gwimf, round(STF*100), round(maximum_SFR*100), SFEN), 'w')
+        'Simulation_results_from_galaxy_evol/IGIMFs__imf{}STF{}log_SFR{}SFEN{}.txt'.format(imf, round(STF*100), round(maximum_SFR*100), SFEN), 'w')
     file.write("# This file saves IGIMFs at all epochs for the chemical evolution of a galaxy"
                " with input parameters: imf={}, STF={}, log_SFR_max={}, SFEN={}, Z_0={}\n".format(imf, STF, maximum_SFR,
                                                                                                   SFEN, log_Z_0))

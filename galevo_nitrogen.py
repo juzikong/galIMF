@@ -34,7 +34,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
                 time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
                 SFH_model='provided', SFE=0.05,
                 SNIa_ON=True, SNIa_yield_table='Thielemann1993', solar_abu_table='Anders1989',
-                high_time_resolution=None, plot_show=None, plot_save=None, outflow=None, check_igimf=False):
+                high_time_resolution=None, plot_show=None, plot_save=None, outflow=None, check_igimf=False, tau_infalle9=0):
     start_time = time.time()
 
     ######################
@@ -83,7 +83,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
         total_energy_release_list, SN_number_per_century, total_gas_kinetic_energy_list, original_gas_mass  # , binding_energy_list
     global BH_mass_list, NS_mass_list, WD_mass_list, all_sf_imf, all_sfr
     global times_calculate_igimf, instantaneous_recycling, primary_He_mass_fraction
-    global X_solar, Y_solar, Z_solar, log_binding_energy_initial
+    global X_solar, Y_solar, Z_solar, log_binding_energy_initial, infall_mass_till_this_time_list
 
     instantaneous_recycling = False
     times_calculate_igimf = 0
@@ -111,7 +111,11 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
 
     # Star Trasnformation fraction (STF)
     total_star_formed = 10 ** 7 * total_SF
-    original_gas_mass = total_star_formed / STF  # in solar mass unit
+    if tau_infalle9 == True:
+      total_gas_mass = total_star_formed / STF
+      original_gas_mass = total_gas_mass/1000
+    else:
+      original_gas_mass = total_star_formed / STF  # in solar mass unit
     print("original_gas_mass =", math.log(original_gas_mass, 10))
     ratio_gas_over_DM_radii = 0.3
     log_binding_energy_initial = round(
@@ -335,7 +339,8 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
         solar_abu_table, "He", Z_0, Z_solar)
     Z_over_X = math.log(Z_0 / primary_H_mass_fraction, 10) - math.log(Z_solar / X_solar, 10)
     # do calculation for each time start from time 0
-    time_step = 0
+    time_step = 0 
+    infall_mass_till_this_time_list = [1e-9]
     gc_collect_check = 1
     # do calculation for each time to the end time
     while time_step < length_list_time_step:
@@ -1246,7 +1251,14 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
         if total_Fe_mass_at_this_time < 0.0001:
             total_Fe_mass_at_this_time = 0.0001
 
-
+        if tau_infalle9 == True:
+            tau_infall = tau_infalle9 * 1e9
+            A_in = total_gas_mass / tau_infall / tau_infall
+            infall_mass_till_this_time = A_in * (tau_infall ** 2 - (tau_infall * this_time + tau_infall ** 2) * math.exp(-this_time / tau_infall))
+            infall_mass_at_this_time = infall_mass_till_this_time - infall_mass_till_this_time_list[-1]
+            total_gas_mass_at_this_time += infall_mass_at_this_time
+            total_H_mass_at_this_time += infall_mass_at_this_time * 0.75
+            infall_mass_till_this_time_list += [infall_mass_till_this_time]
 
         # calculate the kinetic energy of the gas if they have a uniform temperature of 2 keV:
         X_for_H = total_H_mass_at_this_time / total_gas_mass_at_this_time
@@ -1262,20 +1274,6 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
         log_energy_per_molecule = math.log(2 * 1.60217662, 10) - 9  # [erg]
         log_total_gas_kinetic_energy = log_total_number_of_molecule + log_energy_per_molecule  # log [erg]
         total_gas_kinetic_energy = 10 ** log_total_gas_kinetic_energy
-
-        # if outflow is None:
-        #     if total_energy_release == 0:
-        #         outflow = None
-        #     elif math.log(total_energy_release, 10) + 51 > log_binding_energy:
-        #         outflow = True
-        # elif outflow == True:
-        #     if total_energy_release == 0:
-        #         outflow = None
-        #     elif math.log(total_energy_release, 10) + 51 < log_binding_energy:
-        #         outflow = None
-        #
-        # if gas_infall == True:
-        #     function_update_element_gas_infall()
 
         # gas metallicity_at_this_time = total_metal_mass_at_this_time (in gas) / total_gas_mass_at_this_time
         Z_over_X = math.log(total_metal_mass_at_this_time / total_H_mass_at_this_time, 10) - math.log(Z_solar / X_solar,
@@ -1759,10 +1757,6 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
     ###################
 
     return
-
-
-# def function_update_element_gas_infall():
-#     return
 
 
 # # # calculate the diet_Salpeter_mass_to_number_ratio:
@@ -5870,123 +5864,10 @@ if __name__ == '__main__':
     # SNIa_yield_table='Thielemann1993' or 'Seitenzahl2013' or 'Iwamoto1999'
     # solar_abu_table='Anders1989' or 'Asplund2009'
 
-    # galaxy_evol(imf='igimf', STF=0.5, SFEN=SFEN, Z_0=0.015*1e-16, solar_mass_component="Asplund2009_mass",
+    # galaxy_evol(imf='Kroupa', STF=0.5, SFEN=SFEN, Z_0=0.015*1e-16, solar_mass_component="Asplund2009_mass",
     #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
     #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
     #             SFH_model='provided', SFE=0.04, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
     #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=None, outflow=100, check_igimf=None)
+    #             high_time_resolution=None, plot_show=True, plot_save=None, outflow=100, check_igimf=None, tau_infalle9=0)
     
-    # Use plot_show=True on personal computer to view the simualtion result immidiately after the computation
-    # Use plot_show=None if running on a computer cluster to avoid possible issues.
-    # In both cases, the simulation results are saved as txt files.
-
-    #galaxy_evol(imf='Salpeter', STF=0.039, SFEN=SFEN, Z_0=0.02 * 1e-1, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='provided', SFE=0.0015, SNIa_ON='SD', SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=True, plot_show=True, plot_save=None, outflow=100, check_igimf=None)
-
-
-
-
-    # # Model Reproduce L19-Salpeter
-    # # Change line 1128 53.7 to 53.75
-    # # # Reproducing the Salpeter IMF model:
-    # #
-    # galaxy_evol(imf='Salpeter', STF=0.01688, SFEN=SFEN, Z_0=0.02*1e-16, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.001, SNIa_ON='SD', SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)
-
-
-    # # # Model Reproduce L19-R14
-    # # # Change line 1128 53.68 STF=0.0194
-    # # # # Reproducing the IGIMF model:
-    # # #
-    # galaxy_evol(imf='igimf', STF=0.01688, SFEN=SFEN, Z_0=0.02*1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.00082, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=105, check_igimf=None)
-
-
-    # # Model IGIMF-R14
-    # # R14 change galimf.py line 1050, 1053, 1063;   1166, 1169, 1173
-    # # SFH with 0.7, 0.9... to line 48
-    # # line 1801
-    # galaxy_evol(imf='igimf', STF=0.042, SFEN=SFEN, Z_0=0.02 * 1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.0017, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)
-
-
-    # # #
-    # # Model IGIMF-R14-SD with the Greggio 1983 SNIa rate
-    #galaxy_evol(imf='igimf', STF=0.039, SFEN=SFEN, Z_0=0.02 * 1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.0015, SNIa_ON='SD', SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=None, outflow=100, check_igimf=None)
-
-
-    # # Model ?
-    # # # with IGIMF3: from R14 to IGIMF2 change galimf.py line 1050, 1053, 1063; 1166, 1168, 1169, 1172, 1173
-    #galaxy_evol(imf='igimf', STF=0.08, SFEN=SFEN, Z_0=0.02*1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.004, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)
-
-
-
-    # # Model with different SFH?
-    # galaxy_evol(imf='igimf', STF=0.0218, SFEN=SFEN, Z_0=0.02*1e-16, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.004, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)
-
-
-    # # Model IGIMF2
-    # galaxy_evol(imf='igimf', STF=0.073, SFEN=SFEN, Z_0=0.02 * 1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.0045, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)
-
-
-    # # Model IGIMF3
-    # galaxy_evol(imf='igimf', STF=0.03, SFEN=SFEN, Z_0=0.02 * 1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.002, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)
-
-
-    # # Model IGIMF4
-    # galaxy_evol(imf='igimf', STF=0.052, SFEN=SFEN, Z_0=0.02 * 1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.0035, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)
-
-    # # Model IGIMF-Z
-    # galaxy_evol(imf='igimf', STF=0.043, SFEN=SFEN, Z_0=0.02 * 1e-7, solar_mass_component="Asplund2009_mass",
-    #             str_yield_table='Kobayashi06', IMF_name='Kroupa', steller_mass_upper_bound=150,
-    #             time_resolution_in_Myr=1, mass_boundary_observe_low=1.5, mass_boundary_observe_up=8,
-    #             SFH_model='gas_mass_dependent', SFE=0.0035, SNIa_ON=True, SNIa_yield_table='Iwamoto1999',
-    #             solar_abu_table='Asplund2009',
-    #             high_time_resolution=None, plot_show=True, plot_save=True, outflow=100, check_igimf=None)

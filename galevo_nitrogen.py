@@ -1546,7 +1546,6 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
         C_over_H_list += [C_over_H_number_ratio]
         N_over_H_list += [N_over_H_number_ratio]
         C_over_O_list += [C_over_O_number_ration]
-        O_over_H_list += [O_over_H_number_ratio]
         Ca_over_H_list += [Ca_over_H_number_ratio]
         Si_over_H_list += [Si_over_H_number_ratio]
         S_over_H_list += [S_over_H_number_ratio]

@@ -111,7 +111,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
 
     # Star Trasnformation fraction (STF)
     total_star_formed = 10 ** 7 * total_SF
-    if tau_infalle9 == True:
+    if tau_infalle9 != 0:
       total_gas_mass = total_star_formed / STF
       original_gas_mass = total_gas_mass/1000
     else:
@@ -1251,7 +1251,7 @@ def galaxy_evol(imf='igimf', STF=0.5, SFEN=1, Z_0=0.000000134, solar_mass_compon
         if total_Fe_mass_at_this_time < 0.0001:
             total_Fe_mass_at_this_time = 0.0001
 
-        if tau_infalle9 == True:
+        if tau_infalle9 != 0:
             tau_infall = tau_infalle9 * 1e9
             A_in = total_gas_mass / tau_infall / tau_infall
             infall_mass_till_this_time = A_in * (tau_infall ** 2 - (tau_infall * this_time + tau_infall ** 2) * math.exp(-this_time / tau_infall))
